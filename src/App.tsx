@@ -511,6 +511,8 @@ const BoardPage: React.FC = () => {
             setShowProfilePage(false)
           }}
           onNewPost={handleNewPost}
+          user={user}
+          profile={profile}
         />
       )}
     </div>

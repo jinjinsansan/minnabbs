@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { Camera, Save, X, User, Mail, Calendar, Shield, Settings, Upload, Trash2, Edit, Send, Sparkles, Heart, Star } from 'lucide-react'
-import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { formatDate } from '../utils/dateUtils'
 import ElegantHeart from './ElegantHeart'
@@ -11,10 +10,11 @@ type DiaryEntry = Database['public']['Tables']['diary']['Row']
 interface ProfilePageProps {
   onClose: () => void
   onNewPost?: (post: Omit<DiaryEntry, 'id' | 'created_at'>) => void
+  user: any
+  profile: any
 }
 
-const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost }) => {
-  const { user, profile } = useAuth()
+const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, profile }) => {
 
   console.log('ProfilePage - user:', user)
   console.log('ProfilePage - profile:', profile)
