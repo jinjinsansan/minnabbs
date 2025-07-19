@@ -284,14 +284,47 @@ const BoardPage: React.FC = () => {
 
   console.log('App render - authLoading:', authLoading, 'loading:', loading, 'user:', user, 'profile:', profile)
 
-  if (authLoading || loading) {
-    console.log('Showing loading spinner')
+  // 認証がまだ初期化中の場合はローディング表示
+  if (authLoading) {
+    console.log('Showing auth loading spinner')
     return (
       <div className="app-container">
         <div className="app-content">
           <Header />
           <div className="main-content">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+            <div className="flex items-center justify-center min-h-[50vh]">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // データ取得中の場合はローディング表示（ただし認証は完了している）
+  if (loading) {
+    console.log('Showing data loading spinner')
+    return (
+      <div className="app-container">
+        <div className="app-content">
+          <Header 
+            onAdminClick={() => {
+              console.log('Admin button clicked')
+              if (profile?.is_admin) {
+                setShowAdminPanel(true)
+              } else {
+                setShowAdminLogin(true)
+              }
+            }}
+            onProfileClick={() => {
+              console.log('Profile button clicked, showProfilePage:', showProfilePage)
+              setShowProfilePage(true)
+            }}
+          />
+          <div className="main-content">
+            <div className="flex items-center justify-center min-h-[50vh]">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+            </div>
           </div>
         </div>
       </div>
