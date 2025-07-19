@@ -171,7 +171,7 @@ const BoardPage: React.FC = () => {
     if (!authLoading) {
       console.log('Auth loading finished, proceeding with data fetch')
       if (useTestData) {
-        console.log('Using test data')
+        console.log('Using test data, setting diaries:', mockDiaries.length)
         // テストデータを使用
         setDiaries(mockDiaries)
         setFilteredDiaries(mockDiaries)
@@ -183,7 +183,7 @@ const BoardPage: React.FC = () => {
     } else {
       console.log('Still loading auth...')
     }
-  }, [authLoading, useTestData])
+  }, [authLoading]) // useTestDataを依存関係から削除
 
   const fetchDiaries = async () => {
     try {
@@ -385,8 +385,14 @@ const BoardPage: React.FC = () => {
     <div className="app-container">
       <div className="app-content">
         <Header 
-          onAdminClick={() => setShowAdminPanel(true)}
-          onProfileClick={() => setShowProfilePage(true)}
+          onAdminClick={() => {
+            console.log('Admin button clicked')
+            setShowAdminPanel(true)
+          }}
+          onProfileClick={() => {
+            console.log('Profile button clicked, showProfilePage:', showProfilePage)
+            setShowProfilePage(true)
+          }}
         />
         
         <main className="main-content">
@@ -406,7 +412,19 @@ const BoardPage: React.FC = () => {
                   <div className="flex items-center space-x-2 sm:space-x-3">
                     {/* テストデータ切り替えボタン */}
                     <button
-                      onClick={() => setUseTestData(!useTestData)}
+                      onClick={() => {
+                        console.log('Toggle test data, current:', useTestData)
+                        const newUseTestData = !useTestData
+                        setUseTestData(newUseTestData)
+                        if (newUseTestData) {
+                          console.log('Switching to test data')
+                          setDiaries(mockDiaries)
+                          setFilteredDiaries(mockDiaries)
+                        } else {
+                          console.log('Switching to production data')
+                          fetchDiaries()
+                        }
+                      }}
                       className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
                         useTestData 
                           ? 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 border-2 border-blue-300' 
@@ -488,7 +506,10 @@ const BoardPage: React.FC = () => {
       {/* Profile Page */}
       {showProfilePage && (
         <ProfilePage 
-          onClose={() => setShowProfilePage(false)}
+          onClose={() => {
+            console.log('Profile page closing')
+            setShowProfilePage(false)
+          }}
           onNewPost={handleNewPost}
         />
       )}
