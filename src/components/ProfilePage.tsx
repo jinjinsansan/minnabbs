@@ -19,6 +19,27 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost }) => {
   console.log('ProfilePage - user:', user)
   console.log('ProfilePage - profile:', profile)
 
+  // useStateを最上位で宣言
+  const [displayName, setDisplayName] = useState('')
+  const [bio, setBio] = useState('')
+  const [website, setWebsite] = useState('')
+  const [location, setLocation] = useState('')
+  const [avatarUrl, setAvatarUrl] = useState('')
+  const [isPublic, setIsPublic] = useState(true)
+  const [emailNotifications, setEmailNotifications] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [activeTab, setActiveTab] = useState<'diary' | 'profile' | 'privacy' | 'notifications'>('diary')
+  
+  // 日記投稿用の状態
+  const [diaryContent, setDiaryContent] = useState('')
+  const [insights, setInsights] = useState('')
+  const [selectedEmotion, setSelectedEmotion] = useState('')
+  const [diaryNickname, setDiaryNickname] = useState('')
+  const [isAnonymous, setIsAnonymous] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedDate, setSelectedDate] = useState(new Date())
+
   // ログインしていない場合はログインを促す
   if (!user) {
     return (
@@ -45,26 +66,6 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost }) => {
       </div>
     )
   }
-
-  const [displayName, setDisplayName] = useState('')
-  const [bio, setBio] = useState('')
-  const [website, setWebsite] = useState('')
-  const [location, setLocation] = useState('')
-  const [avatarUrl, setAvatarUrl] = useState('')
-  const [isPublic, setIsPublic] = useState(true)
-  const [emailNotifications, setEmailNotifications] = useState(true)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'diary' | 'profile' | 'privacy' | 'notifications'>('diary')
-  
-  // 日記投稿用の状態
-  const [diaryContent, setDiaryContent] = useState('')
-  const [insights, setInsights] = useState('')
-  const [selectedEmotion, setSelectedEmotion] = useState('')
-  const [diaryNickname, setDiaryNickname] = useState('')
-  const [isAnonymous, setIsAnonymous] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [selectedDate, setSelectedDate] = useState(new Date())
 
   useEffect(() => {
     if (profile) {
