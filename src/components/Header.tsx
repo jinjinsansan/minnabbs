@@ -177,18 +177,19 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
         {showMobileMenu && (
           <div className="md:hidden border-t border-purple-200/50 py-4 bg-gradient-to-r from-white/90 to-purple-50/90 backdrop-blur-md">
             <div className="space-y-4 px-4">
+              {/* かんじょうにっきに戻るボタン（常に表示） */}
+              <a
+                href="https://apps.namisapo2.love"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-red-600 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 w-full justify-center"
+                onClick={() => setShowMobileMenu(false)}
+              >
+                <span className="text-sm">かんじょうにっきに戻る</span>
+              </a>
+
               {user ? (
                 <>
-                  {/* かんじょうにっきに戻るボタン（ログイン後のみ） */}
-                  <a
-                    href="https://apps.namisapo2.love"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center space-x-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-red-600 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 w-full justify-center"
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    <span className="text-sm">かんじょうにっきに戻る</span>
-                  </a>
 
                   <button
                     onClick={() => {
