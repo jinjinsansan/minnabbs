@@ -81,19 +81,8 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
                 {/* プロフィールボタン */}
                 <button
                   onClick={onProfileClick}
-                  className="flex items-center space-x-3 bg-gradient-to-r from-white/90 to-purple-50/90 rounded-2xl px-4 py-2.5 hover:from-white hover:to-purple-100 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 border border-purple-200/50"
+                  className="flex items-center space-x-2 bg-gradient-to-r from-white/90 to-purple-50/90 rounded-xl px-3 py-2 hover:from-white hover:to-purple-100 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 border border-purple-200/50"
                 >
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-white to-purple-50 border border-purple-200/50 flex items-center justify-center shadow-sm hover:shadow-md transition-all duration-200">
-                    {profile?.avatar_url ? (
-                      <img
-                        src={profile.avatar_url}
-                        alt="プロフィール"
-                        className="w-full h-full rounded-xl object-cover"
-                      />
-                    ) : (
-                      <ElegantHeart className={getRandomHeartColor()} size="sm" />
-                    )}
-                  </div>
                   <div className="text-left">
                     <div className="flex items-center space-x-1">
                       <span className="text-sm font-semibold bg-gradient-to-r from-gray-800 to-purple-800 bg-clip-text text-transparent">
@@ -103,9 +92,6 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
                         <Shield className="w-3 h-3 text-yellow-500" />
                       )}
                     </div>
-                    <span className="text-xs text-purple-600/70 font-medium">
-                      @{profile?.display_name?.toLowerCase().replace(/\s+/g, '') || 'anonymous'}
-                    </span>
                   </div>
                 </button>
                 
