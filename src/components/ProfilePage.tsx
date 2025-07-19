@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { Save, X, User, Mail, Calendar, Shield, Upload, Trash2, Send, Sparkles, Heart, Star } from 'lucide-react'
+import { Save, X, User, Mail, Calendar, Shield, Upload, Trash2, Send, Sparkles, Heart, Star, Ban, UnlockKeyhole } from 'lucide-react'
 import { formatDate } from '../utils/dateUtils'
 import ElegantHeart from './ElegantHeart'
 import { supabase, Database } from '../lib/supabase'
+import { useBlock } from '../hooks/useBlock'
 
 type DiaryEntry = Database['public']['Tables']['diary']['Row']
 
@@ -26,7 +27,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
   const [avatarUrl, setAvatarUrl] = useState('')
   const [isPublic, setIsPublic] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'diary' | 'profile' | 'privacy'>('diary')
+  const [activeTab, setActiveTab] = useState<'diary' | 'profile' | 'privacy' | 'blocks'>('diary')
   
   // 日記投稿用の状態
   const [diaryContent, setDiaryContent] = useState('')
@@ -36,6 +37,39 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
   const [isAnonymous, setIsAnonymous] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedDate, setSelectedDate] = useState(new Date())
+
+  // ブロック機能
+  const { blockedUsers, unblockUser, loading: blockLoading } = useBlock()
+  const [blockedUserProfiles, setBlockedUserProfiles] = useState<Array<{
+    id: string
+    display_name: string | null
+    email: string | null
+    created_at: string
+  }>>([])
+
+  // ブロックしたユーザーのプロフィール情報を取得
+  useEffect(() => {
+    const fetchBlockedUserProfiles = async () => {
+      if (blockedUsers.length === 0) {
+        setBlockedUserProfiles([])
+        return
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, display_name, email, created_at')
+          .in('id', blockedUsers)
+
+        if (error) throw error
+        setBlockedUserProfiles(data || [])
+      } catch (error) {
+        console.error('Error fetching blocked user profiles:', error)
+      }
+    }
+
+    fetchBlockedUserProfiles()
+  }, [blockedUsers])
 
   // ログインしていない場合はログインを促す
   if (!user) {
@@ -262,6 +296,17 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
             >
               <Shield className="w-4 h-4" />
               <span>プライバシー</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('blocks')}
+              className={`flex items-center space-x-2 px-4 sm:px-6 py-4 font-medium transition-colors whitespace-nowrap min-w-[120px] sm:min-w-0 ${
+                activeTab === 'blocks'
+                  ? 'text-red-600 border-b-2 border-red-500 bg-red-50'
+                  : 'text-gray-600 hover:text-red-600 hover:bg-red-50/50'
+              }`}
+            >
+              <Ban className="w-4 h-4" />
+              <span>ブロック管理</span>
             </button>
           </div>
         </div>
@@ -686,6 +731,119 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
                   <button className="bg-gradient-to-r from-red-400 to-pink-400 text-white px-6 py-3 rounded-xl font-semibold hover:from-red-500 hover:to-pink-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 min-h-[48px] w-full sm:w-auto">
                     アカウントを削除
                   </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Blocks Tab */}
+          {activeTab === 'blocks' && (
+            <div className="space-y-4 sm:space-y-6 bg-gradient-to-br from-red-50/50 to-pink-50/50 rounded-2xl p-4 sm:p-6">
+              <div className="bg-gradient-to-br from-white/80 to-red-50/80 rounded-2xl p-4 sm:p-6 border border-red-200 shadow-lg">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
+                    <Ban className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
+                      ブロック管理
+                    </h3>
+                    <p className="text-sm text-red-600 font-medium">
+                      ブロックしたユーザーを管理できます
+                    </p>
+                  </div>
+                </div>
+
+                {blockedUserProfiles.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Ban className="w-8 h-8 text-red-400" />
+                    </div>
+                    <h4 className="text-lg font-semibold text-red-800 mb-2">
+                      ブロックしたユーザーはいません
+                    </h4>
+                    <p className="text-red-600 text-sm">
+                      他のユーザーのプロフィールページでブロックボタンを押すと、ここで管理できます。
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm text-red-600 font-medium mb-4">
+                      {blockedUserProfiles.length}人のユーザーをブロックしています
+                    </p>
+                    {blockedUserProfiles.map((blockedUser) => (
+                      <div key={blockedUser.id} className="flex items-center justify-between p-4 bg-white/70 rounded-xl border border-red-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-red-100 to-pink-100 rounded-full flex items-center justify-center border-2 border-red-200">
+                            <span className="text-red-600 font-bold text-sm">
+                              {(blockedUser.display_name || 'U').charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-800">
+                              {blockedUser.display_name || '匿名'}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              {blockedUser.email}
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              登録: {formatDate(new Date(blockedUser.created_at))}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={async () => {
+                            const success = await unblockUser(blockedUser.id)
+                            if (success) {
+                              alert(`${blockedUser.display_name || 'ユーザー'}のブロックを解除しました`)
+                            } else {
+                              alert('ブロック解除に失敗しました')
+                            }
+                          }}
+                          disabled={blockLoading}
+                          className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 rounded-xl font-semibold hover:from-green-200 hover:to-emerald-200 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {blockLoading ? (
+                            <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <UnlockKeyhole className="w-4 h-4" />
+                          )}
+                          <span className="text-sm">ブロック解除</span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-50/80 to-indigo-50/80 rounded-2xl p-4 sm:p-6 border border-blue-200 shadow-lg">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center shadow-lg">
+                    <Shield className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                      ブロック機能について
+                    </h3>
+                  </div>
+                </div>
+                <div className="space-y-3 text-sm text-blue-700">
+                  <div className="flex items-start space-x-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <p>ブロックしたユーザーの投稿やコメントは表示されません</p>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <p>ブロックしたユーザーのプロフィールページにはアクセスできません</p>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <p>ブロックは双方向で機能し、お互いに投稿が見えなくなります</p>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <p>いつでもブロックを解除できます</p>
+                  </div>
                 </div>
               </div>
             </div>
