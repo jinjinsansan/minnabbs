@@ -60,7 +60,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
   const [showEditModal, setShowEditModal] = useState(false)
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(Math.floor(Math.random() * 50) + 1) // テスト用のランダムないいね数
-  const { profile } = useAuth()
+  const { user, profile } = useAuth()
   const colors = getEmotionColorClasses(diary.emotion) // 感情に応じた色を取得
 
   const isOwner = currentUserId === diary.user_id
@@ -109,6 +109,11 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
   }
 
   const handleLike = () => {
+    if (!user) {
+      alert('いいね！するにはログインが必要です。')
+      return
+    }
+    
     if (liked) {
       setLiked(false)
       setLikeCount(prev => prev - 1)
@@ -119,12 +124,25 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
   }
 
   const handleShare = () => {
+    if (!user) {
+      alert('シェアするにはログインが必要です。')
+      return
+    }
+    
     const diaryUrl = `${window.location.origin}/diary/${diary.id}`
     const shareText = `${getDisplayName()}さんの日記\n\n${diary.content?.substring(0, 50)}${diary.content && diary.content.length > 50 ? '...' : ''}\n\n#かんじょうにっき仲間で繋がりたい\n#かんじょうにっき #感情日記 #自己肯定感 #みんなにっき`
     const shareUrl = 'https://namisapo.vercel.app/'
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`
     
     window.open(twitterUrl, '_blank', 'width=550,height=420')
+  }
+
+  const handleCommentClick = () => {
+    if (!user) {
+      alert('コメントするにはログインが必要です。')
+      return
+    }
+    setShowComments(!showComments)
   }
 
   return (
@@ -187,7 +205,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
           {/* Actions */}
           <div className="flex items-center justify-between mt-6 max-w-lg">
             <button 
-              onClick={() => setShowComments(!showComments)}
+              onClick={handleCommentClick}
               className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 px-4 py-2.5 rounded-xl transition-all duration-200 group text-sm font-medium shadow-sm hover:shadow-md transform hover:scale-105"
             >
               <MessageCircle className="w-4 h-4" />
