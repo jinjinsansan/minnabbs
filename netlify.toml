@@ -1,6 +1,6 @@
 [build]
-  # 依存関係のインストールとビルド
-  command = "npm ci && npm run build"
+  # 依存関係のインストールとビルド（devDependenciesも含める）
+  command = "npm ci --include=dev && npm run build"
   # 公開ディレクトリ
   publish = "dist"
 
