@@ -290,7 +290,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
           {/* Comments */}
           {showComments && (
             <div className="mt-6 border-t border-gray-200/50 pt-6 bg-gradient-to-br from-gray-50/30 to-white/30 rounded-2xl p-4 backdrop-blur-sm">
-              <CommentSection diaryId={diary.id} useTestData={useTestData} />
+              <CommentSection diaryId={diary.id} />
             </div>
           )}
         </div>
