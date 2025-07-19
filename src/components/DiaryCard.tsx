@@ -415,6 +415,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
                 diaryId={diary.id} 
                 diaryUserId={diary.user_id || undefined}
                 isAdmin={isAdmin}
+                onUserClick={onUserClick}
               />
             </div>
           )}

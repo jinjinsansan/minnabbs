@@ -9,6 +9,7 @@ import AdminLogin from './components/AdminLogin'
 import ProfilePage from './components/ProfilePage'
 import UserProfilePage from './components/UserProfilePage'
 import { useAuth } from './hooks/useAuth'
+import { useBlock } from './hooks/useBlock'
 import { supabase, Database } from './lib/supabase'
 
 type DiaryEntry = Database['public']['Tables']['diary']['Row']
@@ -20,6 +21,8 @@ const DiaryDetailPage: React.FC = () => {
   const navigate = useNavigate()
   const [diary, setDiary] = useState<DiaryEntry | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showUserProfilePage, setShowUserProfilePage] = useState(false)
+  const [selectedUserId, setSelectedUserId] = useState<string>('')
   const { user, profile } = useAuth()
 
   useEffect(() => {
@@ -110,8 +113,20 @@ const DiaryDetailPage: React.FC = () => {
           onDelete={handleDeleteDiary}
           onUpdate={handleUpdateDiary}
           showFullContent={true}
+          onUserClick={(userId) => {
+            setSelectedUserId(userId)
+            setShowUserProfilePage(true)
+          }}
         />
       </main>
+
+      {/* User Profile Page */}
+      {showUserProfilePage && (
+        <UserProfilePage
+          userId={selectedUserId}
+          onClose={() => setShowUserProfilePage(false)}
+        />
+      )}
     </div>
   )
 }
@@ -127,7 +142,13 @@ const BoardPage: React.FC = () => {
   const [showUserProfilePage, setShowUserProfilePage] = useState(false)
   const [selectedUserId, setSelectedUserId] = useState<string>('')
   const [filteredDiaries, setFilteredDiaries] = useState<DiaryEntry[]>([])
+  const [displayedDiaries, setDisplayedDiaries] = useState<DiaryEntry[]>([])
+  const [hasMore, setHasMore] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [currentPage, setCurrentPage] = useState(0)
+  const ITEMS_PER_PAGE = 30
   const { user, profile, loading: authLoading } = useAuth()
+  const { blockedUsers } = useBlock()
 
   useEffect(() => {
     if (!authLoading) {
@@ -148,8 +169,24 @@ const BoardPage: React.FC = () => {
       console.log('fetchDiaries result:', { data, error })
 
       if (error) throw error
-      setDiaries(data || [])
-      setFilteredDiaries(data || [])
+      
+      // ブロックしたユーザーの投稿を除外
+      let filteredData = data || []
+      if (user && blockedUsers.length > 0) {
+        filteredData = filteredData.filter(diary => 
+          !diary.user_id || !blockedUsers.includes(diary.user_id)
+        )
+      }
+      
+      setDiaries(filteredData)
+      setFilteredDiaries(filteredData)
+      
+      // 最初の30件を表示
+      const initialDiaries = filteredData.slice(0, ITEMS_PER_PAGE)
+      setDisplayedDiaries(initialDiaries)
+      setHasMore(filteredData.length > ITEMS_PER_PAGE)
+      setCurrentPage(0)
+      
       console.log('Diaries set successfully')
     } catch (error) {
       console.error('Error fetching diaries:', error)
@@ -160,80 +197,16 @@ const BoardPage: React.FC = () => {
     }
   }
 
-  const handleDeleteDiary = async (diaryId: string) => {
-    try {
-      const { error } = await supabase
-        .from('diary')
-        .delete()
-        .eq('id', diaryId)
-
-      if (error) throw error
-      
-      setDiaries(prev => prev.filter(diary => diary.id !== diaryId))
-      setFilteredDiaries(prev => prev.filter(diary => diary.id !== diaryId))
-    } catch (error) {
-      console.error('Error deleting diary:', error)
-      alert('削除に失敗しました')
-    }
-  }
-
-  const handleUpdateDiary = async (diaryId: string, updates: Partial<DiaryEntry>) => {
-    try {
-      const { error } = await supabase
-        .from('diary')
-        .update(updates)
-        .eq('id', diaryId)
-
-      if (error) throw error
-      
-      setDiaries(prev => 
-        prev.map(diary => 
-          diary.id === diaryId ? { ...diary, ...updates } : diary
-        )
-      )
-      setFilteredDiaries(prev => 
-        prev.map(diary => 
-          diary.id === diaryId ? { ...diary, ...updates } : diary
-        )
-      )
-    } catch (error) {
-      console.error('Error updating diary:', error)
-      alert('更新に失敗しました')
-    }
-  }
-
-  const handleNewPost = async (postData: Omit<DiaryEntry, 'id' | 'created_at'>) => {
-    if (!user) {
-      alert('日記を投稿するにはログインが必要です')
-      return
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from('diary')
-        .insert([postData])
-        .select()
-        .single()
-
-      if (error) throw error
-
-      // 新しい投稿をリストの先頭に追加
-      setDiaries(prev => [data, ...prev])
-      setFilteredDiaries(prev => [data, ...prev])
-    } catch (error) {
-      console.error('Error creating post:', error)
-      alert('投稿に失敗しました')
-    }
-  }
-
-  const handleRefresh = () => {
-    fetchDiaries()
-  }
-
+  // フィルター変更時の処理を更新
   const handleFilterChange = (filters: FilterOptions) => {
-    // setSearchFilters(filters)
-    
     let filtered = [...diaries]
+    
+    // ブロックしたユーザーの投稿を除外
+    if (user && blockedUsers.length > 0) {
+      filtered = filtered.filter(diary => 
+        !diary.user_id || !blockedUsers.includes(diary.user_id)
+      )
+    }
     
     // キーワード検索
     if (filters.keyword.trim()) {
@@ -280,6 +253,134 @@ const BoardPage: React.FC = () => {
     }
     
     setFilteredDiaries(filtered)
+    
+    // フィルター後の最初の30件を表示
+    const initialFilteredDiaries = filtered.slice(0, ITEMS_PER_PAGE)
+    setDisplayedDiaries(initialFilteredDiaries)
+    setHasMore(filtered.length > ITEMS_PER_PAGE)
+    setCurrentPage(0)
+  }
+
+  // 追加の日記を読み込む関数
+  const loadMoreDiaries = () => {
+    if (isLoadingMore || !hasMore) return
+
+    setIsLoadingMore(true)
+    
+    const nextPage = currentPage + 1
+    const startIndex = nextPage * ITEMS_PER_PAGE
+    const endIndex = startIndex + ITEMS_PER_PAGE
+    const newDiaries = filteredDiaries.slice(startIndex, endIndex)
+    
+    if (newDiaries.length > 0) {
+      setDisplayedDiaries(prev => [...prev, ...newDiaries])
+      setCurrentPage(nextPage)
+      setHasMore(endIndex < filteredDiaries.length)
+    } else {
+      setHasMore(false)
+    }
+    
+    setIsLoadingMore(false)
+  }
+
+  // スクロール検知のためのIntersection Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+          loadMoreDiaries()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    const sentinel = document.getElementById('load-more-sentinel')
+    if (sentinel) {
+      observer.observe(sentinel)
+    }
+
+    return () => {
+      if (sentinel) {
+        observer.unobserve(sentinel)
+      }
+    }
+  }, [hasMore, isLoadingMore, currentPage, filteredDiaries])
+
+  const handleDeleteDiary = async (diaryId: string) => {
+    try {
+      const { error } = await supabase
+        .from('diary')
+        .delete()
+        .eq('id', diaryId)
+
+      if (error) throw error
+      
+      setDiaries(prev => prev.filter(diary => diary.id !== diaryId))
+      setFilteredDiaries(prev => prev.filter(diary => diary.id !== diaryId))
+      setDisplayedDiaries(prev => prev.filter(diary => diary.id !== diaryId))
+    } catch (error) {
+      console.error('Error deleting diary:', error)
+      alert('削除に失敗しました')
+    }
+  }
+
+  const handleUpdateDiary = async (diaryId: string, updates: Partial<DiaryEntry>) => {
+    try {
+      const { error } = await supabase
+        .from('diary')
+        .update(updates)
+        .eq('id', diaryId)
+
+      if (error) throw error
+      
+      setDiaries(prev => 
+        prev.map(diary => 
+          diary.id === diaryId ? { ...diary, ...updates } : diary
+        )
+      )
+      setFilteredDiaries(prev => 
+        prev.map(diary => 
+          diary.id === diaryId ? { ...diary, ...updates } : diary
+        )
+      )
+      setDisplayedDiaries(prev => 
+        prev.map(diary => 
+          diary.id === diaryId ? { ...diary, ...updates } : diary
+        )
+      )
+    } catch (error) {
+      console.error('Error updating diary:', error)
+      alert('更新に失敗しました')
+    }
+  }
+
+  const handleNewPost = async (postData: Omit<DiaryEntry, 'id' | 'created_at'>) => {
+    if (!user) {
+      alert('日記を投稿するにはログインが必要です')
+      return
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('diary')
+        .insert([postData])
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // 新しい投稿をリストの先頭に追加
+      setDiaries(prev => [data, ...prev])
+      setFilteredDiaries(prev => [data, ...prev])
+      setDisplayedDiaries(prev => [data, ...prev.slice(0, ITEMS_PER_PAGE - 1)])
+    } catch (error) {
+      console.error('Error creating post:', error)
+      alert('投稿に失敗しました')
+    }
+  }
+
+  const handleRefresh = () => {
+    fetchDiaries()
   }
 
   console.log('App render - authLoading:', authLoading, 'loading:', loading, 'user:', user, 'profile:', profile)
@@ -397,21 +498,56 @@ const BoardPage: React.FC = () => {
                 />
                 
                 <div className="space-y-6">
-                  {filteredDiaries.length > 0 ? (
-                    filteredDiaries.map((diary) => (
-                      <DiaryCard
-                        key={diary.id}
-                        diary={diary}
-                        currentUserId={user?.id}
-                        isAdmin={profile?.is_admin || false}
-                        onDelete={handleDeleteDiary}
-                        onUpdate={handleUpdateDiary}
-                        onUserClick={(userId) => {
-                          setSelectedUserId(userId)
-                          setShowUserProfilePage(true)
-                        }}
-                      />
-                    ))
+                  {displayedDiaries.length > 0 ? (
+                    <>
+                      {displayedDiaries.map((diary) => (
+                        <DiaryCard
+                          key={diary.id}
+                          diary={diary}
+                          currentUserId={user?.id}
+                          isAdmin={profile?.is_admin || false}
+                          onDelete={handleDeleteDiary}
+                          onUpdate={handleUpdateDiary}
+                          onUserClick={(userId) => {
+                            setSelectedUserId(userId)
+                            setShowUserProfilePage(true)
+                          }}
+                        />
+                      ))}
+                      
+                      {/* ローディングセンチネル */}
+                      {hasMore && (
+                        <div 
+                          id="load-more-sentinel" 
+                          className="flex items-center justify-center py-8"
+                        >
+                          {isLoadingMore ? (
+                            <div className="flex items-center space-x-3 text-purple-600">
+                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+                              <span className="text-sm font-medium">古い投稿を読み込み中...</span>
+                            </div>
+                          ) : (
+                            <div className="text-center py-4">
+                              <p className="text-sm text-gray-500 font-medium">
+                                スクロールして古い投稿を読み込む
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
+                      {/* 全て読み込み完了 */}
+                      {!hasMore && displayedDiaries.length > 0 && (
+                        <div className="text-center py-8">
+                          <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <span className="text-purple-600 text-lg">✨</span>
+                          </div>
+                          <p className="text-sm text-gray-500 font-medium">
+                            全ての投稿を表示しました
+                          </p>
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div className="text-center py-12 bg-gradient-to-br from-gray-50/50 to-white/50 rounded-2xl border border-gray-200/50">
                       <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">

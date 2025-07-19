@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { Send, Trash2 } from 'lucide-react'
 import { supabase, Database } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { useBlock } from '../hooks/useBlock'
 import { formatDistanceToNow } from 'date-fns'
 import { ja } from 'date-fns/locale'
 import ElegantHeart from './ElegantHeart'
@@ -29,15 +30,17 @@ interface CommentSectionProps {
   diaryId: string
   diaryUserId?: string // 日記投稿者のID
   isAdmin?: boolean // 管理者フラグ
+  onUserClick?: (userId: string) => void // ユーザー名クリック時のコールバック
 }
 
-const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, isAdmin = false }) => {
+const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, isAdmin = false, onUserClick }) => {
   const [comments, setComments] = useState<Comment[]>([])
   const [newComment, setNewComment] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isAnonymous, setIsAnonymous] = useState(false)
   const [userProfiles, setUserProfiles] = useState<Record<string, { display_name: string | null }>>({})
   const { user, profile } = useAuth()
+  const { blockedUsers } = useBlock()
 
   const fetchComments = useCallback(async () => {
     try {
@@ -178,16 +181,21 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
     )
   }
 
+  // ブロックしたユーザーのコメントを除外
+  const filteredComments = comments.filter(comment => 
+    !comment.user_id || !blockedUsers.includes(comment.user_id)
+  )
+
   return (
     <div className="space-y-4 w-full">
       {/* Comments List */}
       <div className="space-y-4 w-full">
-        {comments.length > 0 && (
+        {filteredComments.length > 0 && (
           <div className="text-sm text-purple-600 font-medium mb-3">
-            💬 {comments.length}件のコメント
+            💬 {filteredComments.length}件のコメント
           </div>
         )}
-        {comments.map((comment) => (
+        {filteredComments.map((comment) => (
           <div key={comment.id} className="flex space-x-3 p-2 sm:p-3 rounded-2xl bg-gradient-to-br from-white/50 to-purple-50/30 backdrop-blur-sm border border-purple-200/30 hover:shadow-md transition-all duration-200 w-full" data-heart-color={getRandomHeartColor()}>
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-white to-purple-50 border-2 border-purple-200/50 flex items-center justify-center flex-shrink-0 shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-110">
               <ElegantHeart className={getRandomHeartColor()} size="sm" />
@@ -195,9 +203,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
             <div className="flex-1 min-w-0 w-full">
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center space-x-1 sm:space-x-2 flex-wrap">
-                  <span className="font-semibold bg-gradient-to-r from-gray-800 to-purple-800 bg-clip-text text-transparent text-xs">
+                  <button
+                    onClick={() => comment.user_id && onUserClick && onUserClick(comment.user_id)}
+                    className="font-semibold bg-gradient-to-r from-gray-800 to-purple-800 bg-clip-text text-transparent text-xs hover:from-purple-600 hover:to-pink-600 transition-all duration-200 cursor-pointer"
+                  >
                     {getCommentDisplayName(comment)}
-                  </span>
+                  </button>
                   <span className="text-gray-400 hidden sm:inline">·</span>
                   <span className="text-gray-500/70 text-xs font-medium">
                     {formatDistanceToNow(new Date(comment.created_at), { 
@@ -277,4 +288,4 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
   )
 }
 
-export default CommentSection
+export default CommentSection 

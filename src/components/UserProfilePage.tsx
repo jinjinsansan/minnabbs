@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { X, User, Mail, Calendar, Globe, MapPin, Heart, MessageCircle } from 'lucide-react'
+import { X, User, Mail, Calendar, Globe, MapPin, Heart, MessageCircle, Ban, UnlockKeyhole } from 'lucide-react'
 import { supabase, Database } from '../lib/supabase'
 import { formatDate } from '../utils/dateUtils'
 import ElegantHeart from './ElegantHeart'
+import { useBlock } from '../hooks/useBlock'
+import { useAuth } from '../hooks/useAuth'
 
 type DiaryEntry = Database['public']['Tables']['diary']['Row']
 
@@ -28,6 +30,15 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ userId, onClose }) =>
   const [diaries, setDiaries] = useState<DiaryEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'profile' | 'diaries'>('profile')
+  const { isBlocked, toggleBlock, loading: blockLoading } = useBlock()
+  const { user } = useAuth()
+
+  // ブロックされたユーザーのプロフィールページにアクセスできないようにする
+  useEffect(() => {
+    if (user && isBlocked(userId)) {
+      onClose()
+    }
+  }, [user, userId, isBlocked, onClose])
 
   useEffect(() => {
     fetchUserProfile()
@@ -169,7 +180,7 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ userId, onClose }) =>
                       </span>
                     )}
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h3 className="text-2xl font-bold text-gray-900 mb-1">
                       {profile.display_name || '匿名'}
                     </h3>
@@ -183,6 +194,38 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ userId, onClose }) =>
                       </span>
                     )}
                   </div>
+                  
+                  {/* Block Button */}
+                  {user && user.id !== userId && (
+                    <button
+                      onClick={async () => {
+                        const success = await toggleBlock(userId)
+                        if (success) {
+                          // ブロックした場合はプロフィールページを閉じる
+                          if (isBlocked(userId)) {
+                            onClose()
+                          }
+                        }
+                      }}
+                      disabled={blockLoading}
+                      className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
+                        isBlocked(userId)
+                          ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                          : 'bg-red-100 text-red-700 hover:bg-red-200'
+                      }`}
+                    >
+                      {blockLoading ? (
+                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      ) : isBlocked(userId) ? (
+                        <UnlockKeyhole className="w-4 h-4" />
+                      ) : (
+                        <Ban className="w-4 h-4" />
+                      )}
+                      <span className="text-sm">
+                        {isBlocked(userId) ? 'ブロック解除' : 'ブロック'}
+                      </span>
+                    </button>
+                  )}
                 </div>
 
                 {/* Bio */}
