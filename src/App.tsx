@@ -7,6 +7,7 @@ import SearchFilter, { FilterOptions } from './components/SearchFilter'
 import AdminPanel from './components/AdminPanel'
 import AdminLogin from './components/AdminLogin'
 import ProfilePage from './components/ProfilePage'
+import UserProfilePage from './components/UserProfilePage'
 import { useAuth } from './hooks/useAuth'
 import { supabase, Database } from './lib/supabase'
 
@@ -123,6 +124,8 @@ const BoardPage: React.FC = () => {
   const [showAdminPanel, setShowAdminPanel] = useState(false)
   const [showAdminLogin, setShowAdminLogin] = useState(false)
   const [showProfilePage, setShowProfilePage] = useState(false)
+  const [showUserProfilePage, setShowUserProfilePage] = useState(false)
+  const [selectedUserId, setSelectedUserId] = useState<string>('')
   const [filteredDiaries, setFilteredDiaries] = useState<DiaryEntry[]>([])
   const { user, profile, loading: authLoading } = useAuth()
 
@@ -370,6 +373,10 @@ const BoardPage: React.FC = () => {
                         isAdmin={profile?.is_admin || false}
                         onDelete={handleDeleteDiary}
                         onUpdate={handleUpdateDiary}
+                        onUserClick={(userId) => {
+                          setSelectedUserId(userId)
+                          setShowUserProfilePage(true)
+                        }}
                       />
                     ))
                   ) : (
@@ -441,6 +448,14 @@ const BoardPage: React.FC = () => {
             created_at: profile.created_at,
             is_admin: profile.is_admin || undefined
           } : null}
+        />
+      )}
+
+      {/* User Profile Page */}
+      {showUserProfilePage && (
+        <UserProfilePage
+          userId={selectedUserId}
+          onClose={() => setShowUserProfilePage(false)}
         />
       )}
     </div>

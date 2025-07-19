@@ -19,6 +19,7 @@ interface DiaryCardProps {
   showFullContent?: boolean
   onDelete?: (id: string) => void
   onUpdate?: (id: string, updates: Partial<DiaryEntry>) => void
+  onUserClick?: (userId: string) => void
 }
 
 // 感情に応じた色を取得
@@ -54,7 +55,8 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
   isAdmin = false,
   showFullContent = false,
   onDelete,
-  onUpdate
+  onUpdate,
+  onUserClick
 }) => {
   const [showComments, setShowComments] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
@@ -232,9 +234,12 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
         
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className="font-bold bg-gradient-to-r from-gray-800 to-gray-900 bg-clip-text text-transparent text-sm">
+            <button
+              onClick={() => onUserClick && diary.user_id && onUserClick(diary.user_id)}
+              className="font-bold bg-gradient-to-r from-gray-800 to-gray-900 bg-clip-text text-transparent text-sm hover:from-purple-600 hover:to-pink-600 transition-all duration-200 cursor-pointer"
+            >
               {getDisplayName()}
-            </span>
+            </button>
             <span className="text-gray-500/80 text-xs sm:text-sm font-medium">
               @{getDisplayName().toLowerCase().replace(/\s+/g, '') || 'anonymous'}
             </span>
