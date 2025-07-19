@@ -32,6 +32,8 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
   const [showAdminLogin, setShowAdminLogin] = useState(false)
   const [isSigningIn, setIsSigningIn] = useState(false)
 
+  console.log('Header render - onProfileClick:', onProfileClick, 'user:', user, 'profile:', profile)
+
   const handleAdminLogin = (isAdmin: boolean) => {
     if (isAdmin) {
       loginAsAdmin()
@@ -77,7 +79,11 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
               <>
                 {/* プロフィールボタン */}
                 <button
-                  onClick={onProfileClick}
+                  onClick={() => {
+                    console.log('Desktop profile button clicked')
+                    console.log('onProfileClick function:', onProfileClick)
+                    onProfileClick?.()
+                  }}
                   className="flex items-center space-x-2 bg-gradient-to-r from-white/90 to-purple-50/90 rounded-xl px-3 py-2 hover:from-white hover:to-purple-100 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 border border-purple-200/50"
                 >
                   <div className="text-left">
@@ -164,6 +170,8 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
                 <>
                   <button
                     onClick={() => {
+                      console.log('Mobile profile button clicked')
+                      console.log('onProfileClick function:', onProfileClick)
                       onProfileClick?.()
                       setShowMobileMenu(false)
                     }}
