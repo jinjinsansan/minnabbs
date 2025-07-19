@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Save, X, User, Mail, Calendar, Shield, Settings, Upload, Trash2, Send, Sparkles, Heart, Star } from 'lucide-react'
+import { Save, X, User, Mail, Calendar, Shield, Upload, Trash2, Send, Sparkles, Heart, Star } from 'lucide-react'
 import { formatDate } from '../utils/dateUtils'
 import ElegantHeart from './ElegantHeart'
 import { Database } from '../lib/supabase'
@@ -25,10 +25,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
   const [location, setLocation] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [isPublic, setIsPublic] = useState(true)
-  const [emailNotifications, setEmailNotifications] = useState(true)
   // const [_isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'diary' | 'profile' | 'privacy' | 'notifications'>('diary')
+  const [activeTab, setActiveTab] = useState<'diary' | 'profile' | 'privacy'>('diary')
   
   // 日記投稿用の状態
   const [diaryContent, setDiaryContent] = useState('')
@@ -202,17 +201,6 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
             >
               <Shield className="w-4 h-4" />
               <span>プライバシー</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('notifications')}
-              className={`flex items-center space-x-2 px-4 sm:px-6 py-4 font-medium transition-colors whitespace-nowrap min-w-[120px] sm:min-w-0 ${
-                activeTab === 'notifications'
-                  ? 'text-orange-600 border-b-2 border-orange-500 bg-orange-50'
-                  : 'text-gray-600 hover:text-orange-600 hover:bg-orange-50/50'
-              }`}
-            >
-              <Settings className="w-4 h-4" />
-              <span>通知設定</span>
             </button>
           </div>
         </div>
@@ -630,64 +618,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
             </div>
           )}
 
-          {/* Notifications Tab */}
-          {activeTab === 'notifications' && (
-            <div className="space-y-4 sm:space-y-6 bg-gradient-to-br from-orange-50/50 to-amber-50/50 rounded-2xl p-4 sm:p-6">
-              <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-6 pr-6 sm:pr-8 border-2 border-orange-200 rounded-xl bg-white/70 shadow-lg space-y-3 sm:space-y-0">
-                  <div>
-                    <h3 className="font-semibold text-orange-800">メール通知</h3>
-                    <p className="text-sm text-orange-600 font-medium">
-                      新しいコメントや返信をメールで受け取る
-                    </p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={emailNotifications}
-                      onChange={(e) => setEmailNotifications(e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-orange-400 peer-checked:to-amber-400 shadow-sm"></div>
-                  </label>
-                </div>
 
-                <div className="p-4 sm:p-6 border-2 border-orange-200 rounded-xl bg-white/70 shadow-lg">
-                  <h3 className="font-semibold text-orange-800 mb-4">通知の頻度</h3>
-                  <div className="space-y-3">
-                    <label className="flex items-center space-x-3 min-h-[44px]">
-                      <input
-                        type="radio"
-                        name="frequency"
-                        value="immediate"
-                        className="text-orange-600 focus:ring-orange-500 w-5 h-5"
-                        defaultChecked
-                      />
-                      <span className="text-sm text-orange-700 font-medium">即座に通知</span>
-                    </label>
-                    <label className="flex items-center space-x-3 min-h-[44px]">
-                      <input
-                        type="radio"
-                        name="frequency"
-                        value="daily"
-                        className="text-orange-600 focus:ring-orange-500 w-5 h-5"
-                      />
-                      <span className="text-sm text-orange-700 font-medium">1日1回まとめて</span>
-                    </label>
-                    <label className="flex items-center space-x-3 min-h-[44px]">
-                      <input
-                        type="radio"
-                        name="frequency"
-                        value="weekly"
-                        className="text-orange-600 focus:ring-orange-500 w-5 h-5"
-                      />
-                      <span className="text-sm text-orange-700 font-medium">週1回まとめて</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Footer */}
