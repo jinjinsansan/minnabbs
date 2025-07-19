@@ -20,6 +20,16 @@ export const useAuth = () => {
 
   useEffect(() => {
     console.log('useAuth useEffect started')
+    
+    // 管理者ログイン状態を最初にチェック
+    const adminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true'
+    const adminEmail = localStorage.getItem('adminEmail')
+    
+    if (adminLoggedIn && adminEmail === 'jin@namisapo.com') {
+      console.log('Admin mode detected on init, setting admin state')
+      setIsAdminMode(true)
+    }
+    
     // 現在のセッションを取得
     const getSession = async () => {
       try {
@@ -34,12 +44,32 @@ export const useAuth = () => {
           if (!isAdminMode) {
             await fetchProfile(session.user.id)
           } else {
-            console.log('Admin mode active, skipping profile fetch')
+            console.log('Admin mode active, setting admin profile')
+            const adminProfile = {
+              id: session.user.id,
+              email: adminEmail || 'jin@namisapo.com',
+              display_name: '管理者',
+              avatar_url: null,
+              is_admin: true,
+              created_at: new Date().toISOString()
+            }
+            setProfile(adminProfile)
           }
         } else {
           console.log('No user in session')
           // ユーザーがログインしていない場合でも、管理者ログイン状態をチェック
-          checkAdminLoginStatus()
+          if (isAdminMode) {
+            const adminProfile = {
+              id: 'admin-user',
+              email: adminEmail || 'jin@namisapo.com',
+              display_name: '管理者',
+              avatar_url: null,
+              is_admin: true,
+              created_at: new Date().toISOString()
+            }
+            setProfile(adminProfile)
+            setUser({ id: 'admin-user', email: adminEmail || 'jin@namisapo.com' } as User)
+          }
         }
         
         setLoading(false)
@@ -76,17 +106,32 @@ export const useAuth = () => {
           console.log('User in auth state change, fetching profile...')
           if (!isAdminMode) {
             await fetchProfile(session.user.id)
-            // Googleログイン後も管理者ログイン状態をチェック
-            setTimeout(() => {
-              checkAdminLoginStatus()
-            }, 100)
           } else {
-            console.log('Admin mode active, skipping profile fetch in auth state change')
+            console.log('Admin mode active, setting admin profile in auth state change')
+            const adminProfile = {
+              id: session.user.id,
+              email: adminEmail || 'jin@namisapo.com',
+              display_name: '管理者',
+              avatar_url: null,
+              is_admin: true,
+              created_at: new Date().toISOString()
+            }
+            setProfile(adminProfile)
           }
         } else {
-          console.log('No user in auth state change, checking admin login status')
-          // セッションがない場合でも管理者ログイン状態をチェック
-          checkAdminLoginStatus()
+          console.log('No user in auth state change')
+          if (isAdminMode) {
+            const adminProfile = {
+              id: 'admin-user',
+              email: adminEmail || 'jin@namisapo.com',
+              display_name: '管理者',
+              avatar_url: null,
+              is_admin: true,
+              created_at: new Date().toISOString()
+            }
+            setProfile(adminProfile)
+            setUser({ id: 'admin-user', email: adminEmail || 'jin@namisapo.com' } as User)
+          }
         }
         
         setLoading(false)
@@ -95,7 +140,7 @@ export const useAuth = () => {
     )
 
     return () => subscription.unsubscribe()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isAdminMode]) // isAdminModeを依存配列に追加
 
   const fetchProfile = async (userId: string) => {
     try {
