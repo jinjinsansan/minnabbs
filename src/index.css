@@ -283,7 +283,27 @@
   }
   
   .card-soft {
-    @apply p-6;
+    @apply p-4;
+  }
+  
+  /* モバイル用ボタンサイズ調整 */
+  .btn-mobile {
+    @apply px-3 py-2 text-sm;
+  }
+  
+  /* モバイル用アイコンサイズ調整 */
+  .icon-mobile {
+    @apply w-4 h-4;
+  }
+  
+  /* モバイル用パディング調整 */
+  .p-mobile {
+    @apply p-3;
+  }
+  
+  /* モバイル用マージン調整 */
+  .m-mobile {
+    @apply m-2;
   }
 }
 
@@ -324,5 +344,5 @@
 
 /* メインコンテンツエリアの中央寄せ */
 .main-content {
-  @apply flex flex-col items-center justify-center min-h-[calc(100vh-4rem)];
+  @apply flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] py-4;
 }

@@ -146,30 +146,30 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
   }
 
   return (
-    <article className={`rounded-3xl border-2 p-6 mb-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] backdrop-blur-md ${colors.bg} ${colors.border} bg-gradient-to-br from-white/90 to-white/70`}>
+    <article className={`rounded-3xl border-2 p-4 sm:p-6 mb-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] backdrop-blur-md ${colors.bg} ${colors.border} bg-gradient-to-br from-white/90 to-white/70`}>
       {/* Header */}
       <div className="flex items-start space-x-3">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-white to-gray-50 border-2 border-white/50 flex items-center justify-center flex-shrink-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110">
-          <ElegantHeart className={colors.heart} size="md" />
+        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-white to-gray-50 border-2 border-white/50 flex items-center justify-center flex-shrink-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110">
+          <ElegantHeart className={colors.heart} size="sm" />
         </div>
         
         <div className="flex-1 min-w-0">
-          <div className="flex items-center space-x-2 mb-3">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
             <span className="font-bold bg-gradient-to-r from-gray-800 to-gray-900 bg-clip-text text-transparent text-sm">
               {getDisplayName()}
             </span>
-            <span className="text-gray-500/80 text-sm font-medium">
+            <span className="text-gray-500/80 text-xs sm:text-sm font-medium">
               @{getDisplayName().toLowerCase().replace(/\s+/g, '') || 'anonymous'}
             </span>
-            <span className="text-gray-400">·</span>
-            <span className="text-gray-600 text-xs bg-gradient-to-r from-white/80 to-gray-50/80 px-3 py-1.5 rounded-full border border-gray-200/50 shadow-sm font-medium">
+            <span className="text-gray-400 hidden sm:inline">·</span>
+            <span className="text-gray-600 text-xs bg-gradient-to-r from-white/80 to-gray-50/80 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border border-gray-200/50 shadow-sm font-medium">
               {diary.created_at && new Date(diary.created_at).toLocaleDateString('ja-JP', {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric'
               })}
             </span>
-            <span className="text-gray-400">·</span>
+            <span className="text-gray-400 hidden sm:inline">·</span>
             <span className="text-gray-500/70 text-xs font-medium">
               {diary.created_at && formatDistanceToNow(new Date(diary.created_at), { 
                 addSuffix: true, 
@@ -203,46 +203,48 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-between mt-6 max-w-lg">
-            <button 
-              onClick={handleCommentClick}
-              className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 px-4 py-2.5 rounded-xl transition-all duration-200 group text-sm font-medium shadow-sm hover:shadow-md transform hover:scale-105"
-            >
-              <MessageCircle className="w-4 h-4" />
-              <span>コメント</span>
-            </button>
-            
-            <button 
-              onClick={handleLike}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all duration-200 group text-sm font-medium shadow-sm hover:shadow-md transform hover:scale-105 ${
-                liked 
-                  ? 'text-red-500 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100' 
-                  : 'text-gray-600 hover:text-red-500 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100'
-              }`}
-            >
-              <ElegantHeart 
-                className={liked ? 'text-red-500' : 'text-gray-500'} 
-                size="sm" 
-              />
-              <span>いいね</span>
-              {likeCount > 0 && (
-                <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+          <div className="flex items-center justify-between mt-6">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <button 
+                onClick={handleCommentClick}
+                className="flex items-center space-x-1 sm:space-x-2 text-gray-600 hover:text-blue-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all duration-200 group text-xs sm:text-sm font-medium shadow-sm hover:shadow-md transform hover:scale-105"
+              >
+                <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">コメント</span>
+              </button>
+              
+              <button 
+                onClick={handleLike}
+                className={`flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all duration-200 group text-xs sm:text-sm font-medium shadow-sm hover:shadow-md transform hover:scale-105 ${
                   liked 
-                    ? 'bg-red-100 text-red-700' 
-                    : 'bg-gray-100 text-gray-600'
-                }`}>
-                  {likeCount}
-                </span>
-              )}
-            </button>
-            
-            <button 
-              onClick={handleShare}
-              className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 px-4 py-2.5 rounded-xl transition-all duration-200 group text-sm font-medium shadow-sm hover:shadow-md transform hover:scale-105"
-            >
-              <Share className="w-4 h-4" />
-              <span>Xでシェア</span>
-            </button>
+                    ? 'text-red-500 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100' 
+                    : 'text-gray-600 hover:text-red-500 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100'
+                }`}
+              >
+                <ElegantHeart 
+                  className={liked ? 'text-red-500' : 'text-gray-500'} 
+                  size="sm" 
+                />
+                <span className="hidden sm:inline">いいね</span>
+                {likeCount > 0 && (
+                  <span className={`text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ${
+                    liked 
+                      ? 'bg-red-100 text-red-700' 
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    {likeCount}
+                  </span>
+                )}
+              </button>
+              
+              <button 
+                onClick={handleShare}
+                className="flex items-center space-x-1 sm:space-x-2 text-gray-600 hover:text-blue-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all duration-200 group text-xs sm:text-sm font-medium shadow-sm hover:shadow-md transform hover:scale-105"
+              >
+                <Share className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Xでシェア</span>
+              </button>
+            </div>
 
             {canEdit && (
               <div className="relative">

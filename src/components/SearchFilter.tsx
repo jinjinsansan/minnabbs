@@ -50,16 +50,16 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
   const hasActiveFilters = Object.values(filters).some(value => value.trim() !== '')
 
   return (
-    <div className="bg-gradient-to-br from-white/90 to-purple-50/90 backdrop-blur-md rounded-3xl border-2 border-purple-200/50 p-6 mb-6 shadow-xl hover:shadow-2xl transition-all duration-300">
+    <div className="bg-gradient-to-br from-white/90 to-purple-50/90 backdrop-blur-md rounded-3xl border-2 border-purple-200/50 p-4 sm:p-6 mb-6 shadow-xl hover:shadow-2xl transition-all duration-300">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
-            <Search className="w-4 h-4 text-white" />
+          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+            <Search className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
           </div>
-          <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">検索・フィルター</h3>
+          <h3 className="text-base sm:text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">検索・フィルター</h3>
           {hasActiveFilters && (
-            <span className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full border border-blue-200 shadow-sm">
+            <span className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 text-xs font-bold px-2 sm:px-3 py-1 rounded-full border border-blue-200 shadow-sm">
               {filteredCount}/{totalCount}件
             </span>
           )}
@@ -69,22 +69,22 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="flex items-center space-x-1 text-sm text-gray-600 hover:text-gray-800 px-3 py-2 rounded-xl hover:bg-gradient-to-r hover:from-gray-100 hover:to-gray-200 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 font-medium"
+              className="flex items-center space-x-1 text-xs sm:text-sm text-gray-600 hover:text-gray-800 px-2 sm:px-3 py-2 rounded-xl hover:bg-gradient-to-r hover:from-gray-100 hover:to-gray-200 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 font-medium"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>クリア</span>
             </button>
           )}
           
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
+            className={`flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 text-xs sm:text-sm ${
               isExpanded 
                 ? 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 border-2 border-blue-300' 
                 : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-2 border-gray-300 hover:from-gray-200 hover:to-gray-300'
             }`}
           >
-            <Filter className="w-4 h-4" />
+            <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
             <span>{isExpanded ? '閉じる' : '詳細検索'}</span>
           </button>
         </div>

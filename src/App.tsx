@@ -374,24 +374,24 @@ const BoardPage: React.FC = () => {
         />
         
         <main className="main-content">
-          <div className="w-full max-w-4xl">
+          <div className="w-full max-w-4xl px-4 sm:px-6">
             {/* メインコンテンツ */}
-            <div className="space-y-8">
+            <div className="space-y-6 sm:space-y-8">
               {/* 日記一覧 */}
-              <div className="bg-gradient-to-br from-white/80 to-purple-50/80 backdrop-blur-md rounded-3xl border-2 border-purple-200/50 p-8 shadow-2xl hover:shadow-3xl transition-all duration-300">
-                <div className="flex items-center justify-between mb-6">
+              <div className="bg-gradient-to-br from-white/80 to-purple-50/80 backdrop-blur-md rounded-3xl border-2 border-purple-200/50 p-4 sm:p-6 lg:p-8 shadow-2xl hover:shadow-3xl transition-all duration-300">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
-                      <span className="text-white text-lg">📖</span>
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                      <span className="text-white text-sm sm:text-lg">📖</span>
                     </div>
-                    <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">みんなにっき</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">みんなにっき</h2>
                   </div>
                   
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2 sm:space-x-3">
                     {/* テストデータ切り替えボタン */}
                     <button
                       onClick={() => setUseTestData(!useTestData)}
-                      className={`px-4 py-2 text-sm rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
+                      className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
                         useTestData 
                           ? 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 border-2 border-blue-300' 
                           : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-2 border-gray-300'
@@ -407,7 +407,7 @@ const BoardPage: React.FC = () => {
                         refreshing ? 'animate-spin' : ''
                       }`}
                     >
-                      <RefreshCw className="w-5 h-5 text-gray-600" />
+                      <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
                     </button>
                   </div>
                 </div>
