@@ -223,7 +223,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
   }
 
   return (
-    <article className={`rounded-3xl border-2 p-4 sm:p-6 mb-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] backdrop-blur-md ${colors.bg} ${colors.border} bg-gradient-to-br from-white/90 to-white/70`}>
+    <article className={`rounded-3xl border-2 p-4 sm:p-6 mb-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] backdrop-blur-md ${colors.bg} ${colors.border} bg-gradient-to-br from-white/90 to-white/70 w-full`}>
       {/* Header */}
       <div className="flex items-start space-x-3">
         <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-white to-gray-50 border-2 border-white/50 flex items-center justify-center flex-shrink-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110">
@@ -371,7 +371,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
 
           {/* Comments */}
           {showComments && (
-            <div className="mt-6 border-t border-gray-200/50 pt-6 bg-gradient-to-br from-gray-50/30 to-white/30 rounded-2xl p-4 backdrop-blur-sm">
+            <div className="mt-6 border-t border-gray-200/50 pt-6 bg-gradient-to-br from-gray-50/30 to-white/30 rounded-2xl p-2 sm:p-4 backdrop-blur-sm w-full">
               <CommentSection 
                 diaryId={diary.id} 
                 diaryUserId={diary.user_id || undefined}

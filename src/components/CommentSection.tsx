@@ -131,29 +131,29 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full">
       {/* Comments List */}
-      <div className="space-y-4">
+      <div className="space-y-4 w-full">
         {comments.length > 0 && (
           <div className="text-sm text-purple-600 font-medium mb-3">
             💬 {comments.length}件のコメント
           </div>
         )}
         {comments.map((comment) => (
-          <div key={comment.id} className="flex space-x-3 p-3 rounded-2xl bg-gradient-to-br from-white/50 to-purple-50/30 backdrop-blur-sm border border-purple-200/30 hover:shadow-md transition-all duration-200" data-heart-color={getRandomHeartColor()}>
+          <div key={comment.id} className="flex space-x-3 p-2 sm:p-3 rounded-2xl bg-gradient-to-br from-white/50 to-purple-50/30 backdrop-blur-sm border border-purple-200/30 hover:shadow-md transition-all duration-200 w-full" data-heart-color={getRandomHeartColor()}>
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-white to-purple-50 border-2 border-purple-200/50 flex items-center justify-center flex-shrink-0 shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-110">
               <ElegantHeart className={getRandomHeartColor()} size="sm" />
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
+            <div className="flex-1 min-w-0 w-full">
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center space-x-1 sm:space-x-2 flex-wrap">
                   <span className="font-semibold bg-gradient-to-r from-gray-800 to-purple-800 bg-clip-text text-transparent text-xs">
                     {comment.nickname || '匿名'}
                   </span>
-                  <span className="text-purple-500/70 text-xs font-medium">
+                  <span className="text-purple-500/70 text-xs font-medium hidden sm:inline">
                     @{comment.nickname?.toLowerCase().replace(/\s+/g, '') || 'anonymous'}
                   </span>
-                  <span className="text-gray-400">·</span>
+                  <span className="text-gray-400 hidden sm:inline">·</span>
                   <span className="text-gray-500/70 text-xs font-medium">
                     {formatDistanceToNow(new Date(comment.created_at), { 
                       addSuffix: true, 
@@ -164,14 +164,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
                 {canDeleteComment(comment) && (
                   <button
                     onClick={() => handleDeleteComment(comment.id)}
-                    className="p-1.5 rounded-lg hover:bg-red-50 hover:text-red-600 transition-all duration-200 text-gray-400 hover:shadow-sm"
+                    className="p-1.5 rounded-lg hover:bg-red-50 hover:text-red-600 transition-all duration-200 text-gray-400 hover:shadow-sm flex-shrink-0"
                     title="コメントを削除"
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>
                 )}
               </div>
-              <p className="text-gray-800 text-xs mt-1 leading-relaxed font-medium">
+              <p className="text-gray-800 text-xs mt-1 leading-relaxed font-medium break-words">
                 {comment.content}
               </p>
             </div>
@@ -181,22 +181,22 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
 
       {/* Add Comment Form */}
       {user ? (
-        <form onSubmit={handleSubmit} className="border-t border-purple-200/50 pt-4 bg-gradient-to-br from-purple-50/50 to-white/50 backdrop-blur-sm rounded-2xl p-4 mt-4 shadow-sm">
-          <div className="flex space-x-3">
+        <form onSubmit={handleSubmit} className="border-t border-purple-200/50 pt-4 bg-gradient-to-br from-purple-50/50 to-white/50 backdrop-blur-sm rounded-2xl p-2 sm:p-4 mt-4 shadow-sm w-full">
+          <div className="flex space-x-3 w-full">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-white to-purple-50 border-2 border-purple-200/50 flex items-center justify-center flex-shrink-0 shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-110">
               <ElegantHeart className={getRandomHeartColor()} size="sm" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 w-full">
               <textarea
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 placeholder="コメントを書く..."
-                className="w-full p-3 bg-white/80 backdrop-blur-sm border-2 border-purple-200/50 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-300 resize-none text-sm placeholder-purple-400 shadow-sm hover:shadow-md transition-all duration-200 font-medium"
+                className="w-full p-2 sm:p-3 bg-white/80 backdrop-blur-sm border-2 border-purple-200/50 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-300 resize-none text-sm placeholder-purple-400 shadow-sm hover:shadow-md transition-all duration-200 font-medium"
                 rows={2}
                 maxLength={280}
               />
               
-              <div className="flex items-center justify-between mt-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-3 space-y-2 sm:space-y-0">
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -214,7 +214,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
                   <button
                     type="submit"
                     disabled={!newComment.trim() || isSubmitting}
-                    className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-sm transform hover:scale-105"
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 sm:px-4 py-2 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-sm transform hover:scale-105 w-full sm:w-auto"
                   >
                     {isSubmitting ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -231,7 +231,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
           </div>
         </form>
       ) : (
-        <div className="border-t border-purple-200/50 pt-4 bg-gradient-to-br from-purple-50/50 to-white/50 backdrop-blur-sm rounded-2xl p-4 mt-4 shadow-sm">
+        <div className="border-t border-purple-200/50 pt-4 bg-gradient-to-br from-purple-50/50 to-white/50 backdrop-blur-sm rounded-2xl p-2 sm:p-4 mt-4 shadow-sm w-full">
           <div className="text-center py-4">
             <p className="text-purple-600 font-medium mb-2">コメントするにはログインが必要です</p>
             <p className="text-gray-600 text-sm">Googleアカウントでログインして、他のユーザーと交流しましょう</p>
