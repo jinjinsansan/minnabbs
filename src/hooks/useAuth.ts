@@ -18,17 +18,29 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    console.log('useAuth useEffect started')
     // 現在のセッションを取得
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setSession(session)
-      setUser(session?.user ?? null)
-      
-      if (session?.user) {
-        await fetchProfile(session.user.id)
+      try {
+        console.log('Getting session...')
+        const { data: { session } } = await supabase.auth.getSession()
+        console.log('Session result:', session)
+        setSession(session)
+        setUser(session?.user ?? null)
+        
+        if (session?.user) {
+          console.log('User found, fetching profile...')
+          await fetchProfile(session.user.id)
+        } else {
+          console.log('No user in session')
+        }
+        
+        setLoading(false)
+        console.log('Loading set to false')
+      } catch (error) {
+        console.error('Error in getSession:', error)
+        setLoading(false)
       }
-      
-      setLoading(false)
     }
 
     getSession()
@@ -36,16 +48,20 @@ export const useAuth = () => {
     // 認証状態の変更を監視
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session)
         setSession(session)
         setUser(session?.user ?? null)
         
         if (session?.user) {
+          console.log('User in auth state change, fetching profile...')
           await fetchProfile(session.user.id)
         } else {
+          console.log('No user in auth state change, clearing profile')
           setProfile(null)
         }
         
         setLoading(false)
+        console.log('Loading set to false in auth state change')
       }
     )
 

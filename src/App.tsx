@@ -161,24 +161,33 @@ const BoardPage: React.FC = () => {
     dateFrom: '',
     dateTo: ''
   })
-  const [useTestData, setUseTestData] = useState(false) // 本番データを使用
+  const [useTestData, setUseTestData] = useState(true) // テストデータを使用
   const { user, profile, loading: authLoading } = useAuth()
 
+  console.log('BoardPage render - authLoading:', authLoading, 'loading:', loading, 'user:', user, 'profile:', profile)
+
   useEffect(() => {
+    console.log('BoardPage useEffect - authLoading:', authLoading, 'useTestData:', useTestData)
     if (!authLoading) {
+      console.log('Auth loading finished, proceeding with data fetch')
       if (useTestData) {
+        console.log('Using test data')
         // テストデータを使用
         setDiaries(mockDiaries)
         setFilteredDiaries(mockDiaries)
         setLoading(false)
       } else {
+        console.log('Fetching diaries from Supabase')
         fetchDiaries()
       }
+    } else {
+      console.log('Still loading auth...')
     }
   }, [authLoading, useTestData])
 
   const fetchDiaries = async () => {
     try {
+      console.log('fetchDiaries started')
       setRefreshing(true)
       const { data, error } = await supabase
         .from('diary')
@@ -186,14 +195,18 @@ const BoardPage: React.FC = () => {
         .eq('is_public', true)
         .order('created_at', { ascending: false })
 
+      console.log('fetchDiaries result:', { data, error })
+
       if (error) throw error
       setDiaries(data || [])
       setFilteredDiaries(data || [])
+      console.log('Diaries set successfully')
     } catch (error) {
       console.error('Error fetching diaries:', error)
     } finally {
       setLoading(false)
       setRefreshing(false)
+      console.log('Loading states reset')
     }
   }
 
@@ -352,7 +365,10 @@ const BoardPage: React.FC = () => {
     setFilteredDiaries(filtered)
   }
 
+  console.log('App render - authLoading:', authLoading, 'loading:', loading, 'user:', user, 'profile:', profile)
+
   if (authLoading || loading) {
+    console.log('Showing loading spinner')
     return (
       <div className="app-container">
         <div className="app-content">
