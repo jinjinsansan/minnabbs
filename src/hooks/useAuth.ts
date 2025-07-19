@@ -57,6 +57,10 @@ export const useAuth = () => {
         if (session?.user) {
           console.log('User in auth state change, fetching profile...')
           await fetchProfile(session.user.id)
+          // Googleログイン後も管理者ログイン状態をチェック
+          setTimeout(() => {
+            checkAdminLoginStatus()
+          }, 100)
         } else {
           console.log('No user in auth state change, checking admin login status')
           // セッションがない場合でも管理者ログイン状態をチェック
@@ -87,7 +91,22 @@ export const useAuth = () => {
 
       if (data) {
         console.log('Profile found:', data)
-        setProfile(data)
+        // 管理者ログイン状態をチェックしてからプロフィールを設定
+        const adminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true'
+        const adminEmail = localStorage.getItem('adminEmail')
+        
+        if (adminLoggedIn && adminEmail === 'jin@namisapo.com') {
+          console.log('Admin login active, overriding profile with admin settings')
+          const adminProfile = {
+            ...data,
+            email: adminEmail,
+            display_name: '管理者',
+            is_admin: true
+          }
+          setProfile(adminProfile)
+        } else {
+          setProfile(data)
+        }
       } else {
         console.log('Profile not found, creating new profile')
         // プロフィールが存在しない場合は作成
@@ -193,9 +212,12 @@ export const useAuth = () => {
     
     if (adminLoggedIn && adminEmail === 'jin@namisapo.com') {
       console.log('Admin login status found in localStorage, setting admin profile')
-      // 管理者プロフィールを作成
+      // 現在のユーザーIDを保持（Googleログイン済みの場合）
+      const currentUserId = user?.id || 'admin-user'
+      
+      // 管理者プロフィールを作成（既存のユーザーIDを使用）
       const adminProfile = {
-        id: 'admin-user',
+        id: currentUserId,
         email: adminEmail,
         display_name: '管理者',
         avatar_url: null,
@@ -203,8 +225,15 @@ export const useAuth = () => {
         created_at: new Date().toISOString()
       }
       setProfile(adminProfile)
-      setUser({ id: 'admin-user', email: adminEmail } as any)
-      console.log('Admin profile and user set successfully')
+      
+      // ユーザー情報も更新（既存のユーザーIDを保持）
+      if (user) {
+        setUser({ ...user, email: adminEmail })
+      } else {
+        setUser({ id: currentUserId, email: adminEmail } as any)
+      }
+      
+      console.log('Admin profile and user set successfully with ID:', currentUserId)
     } else {
       console.log('No admin login status found or invalid credentials')
     }
@@ -218,9 +247,12 @@ export const useAuth = () => {
     
     console.log('Admin login state saved to localStorage')
     
-    // 管理者プロフィールを設定
+    // 現在のユーザーIDを保持（Googleログイン済みの場合）
+    const currentUserId = user?.id || 'admin-user'
+    
+    // 管理者プロフィールを設定（既存のユーザーIDを使用）
     const adminProfile = {
-      id: 'admin-user',
+      id: currentUserId,
       email: 'jin@namisapo.com',
       display_name: '管理者',
       avatar_url: null,
@@ -228,8 +260,15 @@ export const useAuth = () => {
       created_at: new Date().toISOString()
     }
     setProfile(adminProfile)
-    setUser({ id: 'admin-user', email: 'jin@namisapo.com' } as any)
-    console.log('Admin profile and user set in state')
+    
+    // ユーザー情報も更新（既存のユーザーIDを保持）
+    if (user) {
+      setUser({ ...user, email: 'jin@namisapo.com' })
+    } else {
+      setUser({ id: currentUserId, email: 'jin@namisapo.com' } as any)
+    }
+    
+    console.log('Admin profile and user set in state with ID:', currentUserId)
   }
 
   const logout = () => {
