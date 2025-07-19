@@ -16,6 +16,9 @@ interface ProfilePageProps {
 const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost }) => {
   const { user, profile } = useAuth()
 
+  console.log('ProfilePage - user:', user)
+  console.log('ProfilePage - profile:', profile)
+
   // ログインしていない場合はログインを促す
   if (!user) {
     return (

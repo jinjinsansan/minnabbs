@@ -54,6 +54,7 @@ export const useAuth = () => {
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log('Fetching profile for user:', userId)
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -66,8 +67,10 @@ export const useAuth = () => {
       }
 
       if (data) {
+        console.log('Profile found:', data)
         setProfile(data)
       } else {
+        console.log('Profile not found, creating new profile')
         // プロフィールが存在しない場合は作成
         await createProfile(userId)
       }
@@ -78,10 +81,14 @@ export const useAuth = () => {
 
   const createProfile = async (userId: string) => {
     try {
+      console.log('Creating profile for user:', userId)
       const { data: userData } = await supabase.auth.getUser()
       const user = userData.user
       
-      if (!user) return
+      if (!user) {
+        console.log('No user data found')
+        return
+      }
 
       const newProfile = {
         id: userId,
@@ -89,6 +96,21 @@ export const useAuth = () => {
         display_name: user.user_metadata?.full_name || user.email?.split('@')[0] || '匿名',
         avatar_url: user.user_metadata?.avatar_url || null,
         is_admin: user.email === 'jin@namisapo.com', // 管理者判定
+      }
+
+      console.log('Creating profile with data:', newProfile)
+
+      // まず既存のプロフィールがあるかチェック
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
+
+      if (existingProfile) {
+        console.log('Profile already exists:', existingProfile)
+        setProfile(existingProfile)
+        return
       }
 
       const { data, error } = await supabase
@@ -99,12 +121,39 @@ export const useAuth = () => {
 
       if (error) {
         console.error('Error creating profile:', error)
+        // プロフィール作成に失敗した場合でも、ローカルでプロフィールを作成
+        const fallbackProfile = {
+          id: userId,
+          email: user.email || null,
+          display_name: user.user_metadata?.full_name || user.email?.split('@')[0] || '匿名',
+          avatar_url: user.user_metadata?.avatar_url || null,
+          is_admin: user.email === 'jin@namisapo.com',
+          created_at: new Date().toISOString()
+        }
+        console.log('Using fallback profile:', fallbackProfile)
+        setProfile(fallbackProfile)
         return
       }
 
+      console.log('Profile created successfully:', data)
       setProfile(data)
     } catch (error) {
       console.error('Error in createProfile:', error)
+      // エラーが発生した場合でも、基本的なプロフィール情報を設定
+      const { data: userData } = await supabase.auth.getUser()
+      const user = userData.user
+      if (user) {
+        const fallbackProfile = {
+          id: userId,
+          email: user.email || null,
+          display_name: user.user_metadata?.full_name || user.email?.split('@')[0] || '匿名',
+          avatar_url: user.user_metadata?.avatar_url || null,
+          is_admin: user.email === 'jin@namisapo.com',
+          created_at: new Date().toISOString()
+        }
+        console.log('Using fallback profile due to error:', fallbackProfile)
+        setProfile(fallbackProfile)
+      }
     }
   }
 
