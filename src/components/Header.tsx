@@ -75,31 +75,32 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
           </div>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-2">
             {user ? (
               <>
+                {/* プロフィールボタン */}
                 <button
                   onClick={onProfileClick}
-                  className="flex items-center space-x-3 bg-gradient-to-r from-white/80 to-purple-50/80 rounded-2xl px-4 py-3 hover:from-white hover:to-purple-100 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 border border-purple-200/50"
+                  className="flex items-center space-x-3 bg-gradient-to-r from-white/90 to-purple-50/90 rounded-2xl px-4 py-2.5 hover:from-white hover:to-purple-100 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 border border-purple-200/50"
                 >
-                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-white to-purple-50 border-2 border-purple-200/50 flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-200">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-white to-purple-50 border border-purple-200/50 flex items-center justify-center shadow-sm hover:shadow-md transition-all duration-200">
                     {profile?.avatar_url ? (
                       <img
                         src={profile.avatar_url}
                         alt="プロフィール"
-                        className="w-full h-full rounded-2xl object-cover"
+                        className="w-full h-full rounded-xl object-cover"
                       />
                     ) : (
-                      <ElegantHeart className={getRandomHeartColor()} size="md" />
+                      <ElegantHeart className={getRandomHeartColor()} size="sm" />
                     )}
                   </div>
-                  <div>
+                  <div className="text-left">
                     <div className="flex items-center space-x-1">
                       <span className="text-sm font-semibold bg-gradient-to-r from-gray-800 to-purple-800 bg-clip-text text-transparent">
                         {profile?.display_name || '匿名'}
                       </span>
                       {profile?.is_admin && (
-                        <Shield className="w-4 h-4 text-yellow-500" title="管理者" />
+                        <Shield className="w-3 h-3 text-yellow-500" />
                       )}
                     </div>
                     <span className="text-xs text-purple-600/70 font-medium">
@@ -108,29 +109,31 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
                   </div>
                 </button>
                 
+                {/* 管理者ボタン */}
                 {profile?.is_admin && (
                   <button
                     onClick={onAdminClick}
-                    className="flex items-center space-x-2 px-4 py-2 text-purple-600 hover:text-purple-800 hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+                    className="flex items-center space-x-2 px-3 py-2 text-purple-600 hover:text-purple-800 hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 border border-purple-200/30"
                   >
                     <Settings className="w-4 h-4" />
-                    <span className="text-sm">管理</span>
+                    <span className="text-sm font-medium">管理</span>
                   </button>
                 )}
                 
+                {/* ログアウトボタン */}
                 <button
                   onClick={handleLogout}
-                  className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:text-red-800 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+                  className="flex items-center space-x-2 px-3 py-2 text-red-600 hover:text-red-800 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 border border-red-200/30"
                 >
                   <LogOut className="w-4 h-4" />
-                  <span className="text-sm">ログアウト</span>
+                  <span className="text-sm font-medium">ログアウト</span>
                 </button>
               </>
             ) : (
               <button
                 onClick={handleGoogleSignIn}
                 disabled={isSigningIn}
-                className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-2xl font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-5 py-2.5 rounded-2xl font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSigningIn ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -147,10 +150,10 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
             {user && !profile?.is_admin && (
               <button
                 onClick={() => setShowAdminLogin(true)}
-                className="flex items-center space-x-2 px-4 py-2 text-orange-600 hover:text-orange-800 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+                className="flex items-center space-x-2 px-3 py-2 text-orange-600 hover:text-orange-800 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 border border-orange-200/30"
               >
                 <Shield className="w-4 h-4" />
-                <span className="text-sm">管理者</span>
+                <span className="text-sm font-medium">管理者</span>
               </button>
             )}
           </div>
