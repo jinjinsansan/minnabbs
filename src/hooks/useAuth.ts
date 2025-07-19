@@ -16,6 +16,7 @@ export const useAuth = () => {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isAdminMode, setIsAdminMode] = useState(false)
 
   useEffect(() => {
     console.log('useAuth useEffect started')
@@ -30,7 +31,11 @@ export const useAuth = () => {
         
         if (session?.user) {
           console.log('User found, fetching profile...')
-          await fetchProfile(session.user.id)
+          if (!isAdminMode) {
+            await fetchProfile(session.user.id)
+          } else {
+            console.log('Admin mode active, skipping profile fetch')
+          }
         } else {
           console.log('No user in session')
           // ユーザーがログインしていない場合でも、管理者ログイン状態をチェック
@@ -56,11 +61,15 @@ export const useAuth = () => {
         
         if (session?.user) {
           console.log('User in auth state change, fetching profile...')
-          await fetchProfile(session.user.id)
-          // Googleログイン後も管理者ログイン状態をチェック
-          setTimeout(() => {
-            checkAdminLoginStatus()
-          }, 100)
+          if (!isAdminMode) {
+            await fetchProfile(session.user.id)
+            // Googleログイン後も管理者ログイン状態をチェック
+            setTimeout(() => {
+              checkAdminLoginStatus()
+            }, 100)
+          } else {
+            console.log('Admin mode active, skipping profile fetch in auth state change')
+          }
         } else {
           console.log('No user in auth state change, checking admin login status')
           // セッションがない場合でも管理者ログイン状態をチェック
@@ -212,6 +221,9 @@ export const useAuth = () => {
     
     if (adminLoggedIn && adminEmail === 'jin@namisapo.com') {
       console.log('Admin login status found in localStorage, setting admin profile')
+      // 管理者モードを有効化
+      setIsAdminMode(true)
+      
       // 現在のユーザーIDを保持（Googleログイン済みの場合）
       const currentUserId = user?.id || 'admin-user'
       
@@ -234,6 +246,7 @@ export const useAuth = () => {
       }
       
       console.log('Admin profile and user set successfully with ID:', currentUserId)
+      console.log('Admin mode enabled from checkAdminLoginStatus')
     } else {
       console.log('No admin login status found or invalid credentials')
     }
@@ -241,6 +254,9 @@ export const useAuth = () => {
 
   const loginAsAdmin = () => {
     console.log('loginAsAdmin called')
+    // 管理者モードを有効化
+    setIsAdminMode(true)
+    
     // 管理者ログイン状態をローカルストレージに保存
     localStorage.setItem('adminLoggedIn', 'true')
     localStorage.setItem('adminEmail', 'jin@namisapo.com')
@@ -269,9 +285,13 @@ export const useAuth = () => {
     }
     
     console.log('Admin profile and user set in state with ID:', currentUserId)
+    console.log('Admin mode enabled')
   }
 
   const logout = () => {
+    // 管理者モードを無効化
+    setIsAdminMode(false)
+    
     // 管理者ログイン状態をクリア
     localStorage.removeItem('adminLoggedIn')
     localStorage.removeItem('adminEmail')
