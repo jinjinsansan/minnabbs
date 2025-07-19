@@ -38,3 +38,39 @@ CREATE POLICY "日記は本人のみ作成可能"
   ON diary
   FOR INSERT
   WITH CHECK (auth.uid() = user_id);
+
+-- プロフィールテーブルに新しいカラムを追加
+ALTER TABLE profiles 
+ADD COLUMN IF NOT EXISTS bio TEXT,
+ADD COLUMN IF NOT EXISTS website TEXT,
+ADD COLUMN IF NOT EXISTS location TEXT,
+ADD COLUMN IF NOT EXISTS is_public BOOLEAN DEFAULT true,
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+
+-- 更新時のタイムスタンプを自動更新するトリガー
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_profiles_updated_at 
+    BEFORE UPDATE ON profiles 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Supabase Storageのバケットを作成（手動で実行する必要があります）
+-- 以下のコマンドをSupabase DashboardのSQL Editorで実行してください：
+-- INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true);
+
+-- アバター画像のRLSポリシー
+CREATE POLICY "アバター画像は誰でも閲覧可能" ON storage.objects
+    FOR SELECT USING (bucket_id = 'avatars');
+
+CREATE POLICY "認証済みユーザーのみアバターアップロード可能" ON storage.objects
+    FOR INSERT WITH CHECK (bucket_id = 'avatars' AND auth.role() = 'authenticated');
+
+CREATE POLICY "自分のアバターのみ削除可能" ON storage.objects
+    FOR DELETE USING (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);

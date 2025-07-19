@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Save, X, User, Mail, Calendar, Shield, Upload, Trash2, Send, Sparkles, Heart, Star } from 'lucide-react'
 import { formatDate } from '../utils/dateUtils'
 import ElegantHeart from './ElegantHeart'
-import { Database } from '../lib/supabase'
+import { supabase, Database } from '../lib/supabase'
 
 type DiaryEntry = Database['public']['Tables']['diary']['Row']
 
@@ -25,7 +25,6 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
   const [location, setLocation] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [isPublic, setIsPublic] = useState(true)
-  // const [_isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<'diary' | 'profile' | 'privacy'>('diary')
   
@@ -117,14 +116,23 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
       const updates = {
         display_name: displayName.trim() || null,
         avatar_url: avatarUrl || null,
-        // 他のフィールドも保存（実際のSupabase実装時に追加）
+        bio: bio.trim() || null,
+        website: website.trim() || null,
+        location: location.trim() || null,
+        is_public: isPublic,
+        updated_at: new Date().toISOString()
       }
 
-      // テスト環境では実際の保存は行わない
-      console.log('Profile updates:', updates)
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id)
+
+      if (error) throw error
       
       // 成功メッセージ
       alert('プロフィールを更新しました！')
+      onClose() // モーダルを閉じる
     } catch (error) {
       console.error('Error updating profile:', error)
       alert('プロフィールの更新に失敗しました')
@@ -133,18 +141,71 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
     }
   }
 
-  const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
-    if (file) {
-      // 実際の実装では画像をSupabase Storageにアップロード
-      // テスト環境では仮のURLを設定
-      const fakeUrl = `https://via.placeholder.com/150/4F46E5/FFFFFF?text=${displayName.charAt(0) || 'U'}`
-      setAvatarUrl(fakeUrl)
+    if (!file || !user) return
+
+    // ファイルサイズチェック（5MB）
+    if (file.size > 5 * 1024 * 1024) {
+      alert('ファイルサイズは5MB以下にしてください')
+      return
+    }
+
+    // ファイル形式チェック
+    if (!file.type.match(/image\/(jpeg|png)/)) {
+      alert('JPEGまたはPNG形式の画像を選択してください')
+      return
+    }
+
+    try {
+      // ファイル名を生成
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`
+
+      // Supabase Storageにアップロード
+      const { data, error } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
+
+      if (error) throw error
+
+      // 公開URLを取得
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName)
+
+      setAvatarUrl(publicUrl)
+      console.log('Avatar uploaded successfully:', publicUrl)
+    } catch (error) {
+      console.error('Error uploading avatar:', error)
+      alert('画像のアップロードに失敗しました')
     }
   }
 
-  const handleDeleteAvatar = () => {
-    setAvatarUrl('')
+  const handleDeleteAvatar = async () => {
+    if (!user || !avatarUrl) return
+
+    try {
+      // 現在のアバターURLからファイル名を抽出
+      const urlParts = avatarUrl.split('/')
+      const fileName = urlParts[urlParts.length - 1]
+
+      // Supabase Storageから削除
+      const { error } = await supabase.storage
+        .from('avatars')
+        .remove([fileName])
+
+      if (error) throw error
+
+      setAvatarUrl('')
+      console.log('Avatar deleted successfully')
+    } catch (error) {
+      console.error('Error deleting avatar:', error)
+      alert('画像の削除に失敗しました')
+    }
   }
 
   return (
@@ -244,6 +305,10 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
                     className="w-full pl-6 pr-4 py-4 border-none outline-none resize-none text-base placeholder-pink-400 bg-white/50 rounded-lg min-h-[200px] focus:bg-white/80 transition-all duration-200"
                     placeholder=""
                     maxLength={280}
+                    lang="ja"
+                    inputMode="text"
+                    autoComplete="off"
+                    spellCheck="false"
                   />
                 </div>
                 
@@ -380,6 +445,10 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
                     className="w-full pl-6 pr-4 py-4 border-none outline-none resize-none text-base placeholder-green-400 bg-white/50 rounded-lg min-h-[120px] focus:bg-white/80 transition-all duration-200"
                     placeholder=""
                     maxLength={280}
+                    lang="ja"
+                    inputMode="text"
+                    autoComplete="off"
+                    spellCheck="false"
                   />
                 </div>
               </div>
@@ -512,6 +581,10 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
                     placeholder="自己紹介を書いてください..."
                     maxLength={160}
                     rows={3}
+                    lang="ja"
+                    inputMode="text"
+                    autoComplete="off"
+                    spellCheck="false"
                   />
                   <p className="text-xs text-blue-500 mt-1 font-medium">
                     {160 - bio.length} 文字残り
