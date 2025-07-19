@@ -61,6 +61,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
   const [showEditModal, setShowEditModal] = useState(false)
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(0)
+  const [commentCount, setCommentCount] = useState(0)
   const { user } = useAuth()
   const colors = getEmotionColorClasses(diary.emotion) // 感情に応じた色を取得
 
@@ -98,6 +99,29 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
 
     fetchLikeStatus()
   }, [diary.id, user])
+
+  // コメント数を取得
+  useEffect(() => {
+    const fetchCommentCount = async () => {
+      try {
+        const { count } = await supabase
+          .from('comments')
+          .select('*', { count: 'exact', head: true })
+          .eq('diary_id', diary.id)
+
+        setCommentCount(count || 0)
+        
+        // コメントがある場合は自動的にコメント欄を開く
+        if (count && count > 0) {
+          setShowComments(true)
+        }
+      } catch (error) {
+        console.error('Error fetching comment count:', error)
+      }
+    }
+
+    fetchCommentCount()
+  }, [diary.id])
 
   const getEmotionDisplay = (emotion: string | null) => {
     const emotions: Record<string, { label: string; color: string }> = {
@@ -194,10 +218,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
   }
 
   const handleCommentClick = () => {
-    if (!user) {
-      alert('コメントするにはログインが必要です。')
-      return
-    }
+    // ログインしていなくてもコメントを見れるようにする
     setShowComments(!showComments)
   }
 
@@ -267,6 +288,11 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
               >
                 <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">コメント</span>
+                {commentCount > 0 && (
+                  <span className="text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-blue-100 text-blue-700">
+                    {commentCount}
+                  </span>
+                )}
               </button>
               
               <button 

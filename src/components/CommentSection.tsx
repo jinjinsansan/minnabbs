@@ -53,6 +53,22 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
     }
   }, [diaryId])
 
+  // コメント数を取得する関数
+  const getCommentCount = useCallback(async () => {
+    try {
+      const { count, error } = await supabase
+        .from('comments')
+        .select('*', { count: 'exact', head: true })
+        .eq('diary_id', diaryId)
+
+      if (error) throw error
+      return count || 0
+    } catch (error) {
+      console.error('Error fetching comment count:', error)
+      return 0
+    }
+  }, [diaryId])
+
   useEffect(() => {
     fetchComments()
   }, [fetchComments])
@@ -118,6 +134,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
     <div className="space-y-4">
       {/* Comments List */}
       <div className="space-y-4">
+        {comments.length > 0 && (
+          <div className="text-sm text-purple-600 font-medium mb-3">
+            💬 {comments.length}件のコメント
+          </div>
+        )}
         {comments.map((comment) => (
           <div key={comment.id} className="flex space-x-3 p-3 rounded-2xl bg-gradient-to-br from-white/50 to-purple-50/30 backdrop-blur-sm border border-purple-200/30 hover:shadow-md transition-all duration-200" data-heart-color={getRandomHeartColor()}>
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-white to-purple-50 border-2 border-purple-200/50 flex items-center justify-center flex-shrink-0 shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-110">
