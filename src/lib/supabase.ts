@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 
 // Supabase設定
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://dummy.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'dummy-key'
+const supabaseUrl = 'https://icujegetejdnibgoytyn.supabase.co'
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljdWplZ2V0ZWpkbmliZ295dHluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3NjkyOTQsImV4cCI6MjA2ODM0NTI5NH0.tdUjObZX1a-gvqmpUvXwVnESDmbwvG_aXTqvCXj7h5U'
 
 // Supabaseクライアントを作成
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)

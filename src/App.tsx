@@ -354,116 +354,115 @@ const BoardPage: React.FC = () => {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-white">
-        <Header />
-        <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+      <div className="app-container">
+        <div className="app-content">
+          <Header />
+          <div className="main-content">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
-      <Header 
-        onAdminClick={() => setShowAdminPanel(true)}
-        onProfileClick={() => setShowProfilePage(true)}
-      />
-      
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* メインコンテンツ */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* 日記一覧 */}
-            <div className="bg-gradient-to-br from-white/80 to-purple-50/80 backdrop-blur-md rounded-3xl border-2 border-purple-200/50 p-8 shadow-2xl hover:shadow-3xl transition-all duration-300">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
-                    <span className="text-white text-lg">📖</span>
+    <div className="app-container">
+      <div className="app-content">
+        <Header 
+          onAdminClick={() => setShowAdminPanel(true)}
+          onProfileClick={() => setShowProfilePage(true)}
+        />
+        
+        <main className="main-content">
+          <div className="w-full max-w-4xl">
+            {/* メインコンテンツ */}
+            <div className="space-y-8">
+              {/* 日記一覧 */}
+              <div className="bg-gradient-to-br from-white/80 to-purple-50/80 backdrop-blur-md rounded-3xl border-2 border-purple-200/50 p-8 shadow-2xl hover:shadow-3xl transition-all duration-300">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                      <span className="text-white text-lg">📖</span>
+                    </div>
+                    <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">みんなにっき</h2>
                   </div>
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">みんなの日記</h2>
+                  
+                  <div className="flex items-center space-x-3">
+                    {/* テストデータ切り替えボタン */}
+                    <button
+                      onClick={() => setUseTestData(!useTestData)}
+                      className={`px-4 py-2 text-sm rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
+                        useTestData 
+                          ? 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 border-2 border-blue-300' 
+                          : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-2 border-gray-300'
+                      }`}
+                    >
+                      {useTestData ? 'テストモード' : '本番モード'}
+                    </button>
+                    
+                    <button
+                      onClick={handleRefresh}
+                      disabled={refreshing}
+                      className={`p-2 rounded-xl hover:bg-white/50 transition-all duration-200 text-purple-600 hover:text-purple-700 shadow-md hover:shadow-lg transform hover:scale-105 ${
+                        refreshing ? 'animate-spin' : ''
+                      }`}
+                    >
+                      <RefreshCw className="w-5 h-5 text-gray-600" />
+                    </button>
+                  </div>
                 </div>
                 
-                <div className="flex items-center space-x-3">
-                  {/* テストデータ切り替えボタン */}
-                  <button
-                    onClick={() => setUseTestData(!useTestData)}
-                    className={`px-4 py-2 text-sm rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
-                      useTestData 
-                        ? 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 border-2 border-blue-300' 
-                        : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-2 border-gray-300'
-                    }`}
-                  >
-                    {useTestData ? 'テストモード' : '本番モード'}
-                  </button>
-                  
-                  <button
-                    onClick={handleRefresh}
-                    disabled={refreshing}
-                    className={`p-2 rounded-xl hover:bg-white/50 transition-all duration-200 text-purple-600 hover:text-purple-700 shadow-md hover:shadow-lg transform hover:scale-105 ${
-                      refreshing ? 'animate-spin' : ''
-                    }`}
-                  >
-                    <RefreshCw className="w-5 h-5 text-gray-600" />
-                  </button>
-                </div>
-              </div>
-              
-              {/* 検索フィルター */}
-              <SearchFilter
-                onFilterChange={handleFilterChange}
-                totalCount={diaries.length}
-                filteredCount={filteredDiaries.length}
-              />
-              
-              <div className="space-y-6">
-                {filteredDiaries.length > 0 ? (
-                  filteredDiaries.map((diary) => (
-                    <DiaryCard
-                      key={diary.id}
-                      diary={diary}
-                      currentUserId={user?.id}
-                      isAdmin={profile?.is_admin || false}
-                      onDelete={handleDeleteDiary}
-                      onUpdate={handleUpdateDiary}
-                    />
-                  ))
-                ) : (
-                  <div className="text-center py-12 bg-gradient-to-br from-gray-50/50 to-white/50 rounded-2xl border border-gray-200/50">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <TrendingUp className="w-8 h-8 text-gray-400" />
+                {/* 検索フィルター */}
+                <SearchFilter
+                  onFilterChange={handleFilterChange}
+                  totalCount={diaries.length}
+                  filteredCount={filteredDiaries.length}
+                />
+                
+                <div className="space-y-6">
+                  {filteredDiaries.length > 0 ? (
+                    filteredDiaries.map((diary) => (
+                      <DiaryCard
+                        key={diary.id}
+                        diary={diary}
+                        currentUserId={user?.id}
+                        isAdmin={profile?.is_admin || false}
+                        onDelete={handleDeleteDiary}
+                        onUpdate={handleUpdateDiary}
+                      />
+                    ))
+                  ) : (
+                    <div className="text-center py-12 bg-gradient-to-br from-gray-50/50 to-white/50 rounded-2xl border border-gray-200/50">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <TrendingUp className="w-8 h-8 text-gray-400" />
+                      </div>
+                      {diaries.length === 0 ? (
+                        <>
+                          <h3 className="text-xl font-bold text-gray-900 mb-2">
+                            まだ投稿がありません
+                          </h3>
+                          <p className="text-gray-500 max-w-sm mx-auto">
+                            プロフィールページから日記を投稿すると、ここに表示されます。
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <h3 className="text-xl font-bold text-gray-900 mb-2">
+                            検索条件に一致する日記が見つかりません
+                          </h3>
+                          <p className="text-gray-500 max-w-sm mx-auto">
+                            検索条件を変更して再度お試しください。
+                          </p>
+                        </>
+                      )}
                     </div>
-                    {diaries.length === 0 ? (
-                      <>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">
-                          まだ投稿がありません
-                        </h3>
-                        <p className="text-gray-500 max-w-sm mx-auto">
-                          プロフィールページから日記を投稿すると、ここに表示されます。
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">
-                          検索条件に一致する日記が見つかりません
-                        </h3>
-                        <p className="text-gray-500 max-w-sm mx-auto">
-                          検索条件を変更して再度お試しください。
-                        </p>
-                      </>
-                    )}
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           </div>
-
-          {/* サイドバー */}
-          <div className="space-y-8">
-            {/* サイドバーは空にして、将来的に必要な要素を追加可能 */}
-          </div>
-        </div>
-      </main>
+        </main>
+      </div>
 
       {/* Admin Panel */}
       {showAdminPanel && (

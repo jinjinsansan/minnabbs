@@ -67,10 +67,10 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
               <ElegantHeart className="text-white" size="lg" />
             </div>
             <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent hidden sm:block">
-              みんなの日記
+              みんなにっき
             </h1>
             <h1 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent sm:hidden">
-              みんなの日記
+              みんなにっき
             </h1>
           </div>
 
