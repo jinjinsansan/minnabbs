@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { Send } from 'lucide-react'
+import { Send, Trash2 } from 'lucide-react'
 import { supabase, Database } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { formatDistanceToNow } from 'date-fns'
@@ -27,9 +27,11 @@ const getRandomHeartColor = () => {
 
 interface CommentSectionProps {
   diaryId: string
+  diaryUserId?: string // 日記投稿者のID
+  isAdmin?: boolean // 管理者フラグ
 }
 
-const CommentSection: React.FC<CommentSectionProps> = ({ diaryId }) => {
+const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, isAdmin = false }) => {
   const [comments, setComments] = useState<Comment[]>([])
   const [newComment, setNewComment] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -83,6 +85,35 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId }) => {
     }
   }
 
+  const handleDeleteComment = async (commentId: string) => {
+    if (!user) return
+
+    if (!window.confirm('このコメントを削除しますか？')) return
+
+    try {
+      const { error } = await supabase
+        .from('comments')
+        .delete()
+        .eq('id', commentId)
+
+      if (error) throw error
+      await fetchComments()
+    } catch (error) {
+      console.error('Error deleting comment:', error)
+      alert('コメントの削除に失敗しました')
+    }
+  }
+
+  // コメント削除権限をチェック
+  const canDeleteComment = (comment: Comment) => {
+    if (!user) return false
+    return (
+      comment.user_id === user.id || // コメント投稿者本人
+      diaryUserId === user.id || // 日記投稿者
+      isAdmin // 管理者
+    )
+  }
+
   return (
     <div className="space-y-4">
       {/* Comments List */}
@@ -93,20 +124,31 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId }) => {
               <ElegantHeart className={getRandomHeartColor()} size="sm" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center space-x-2">
-                <span className="font-semibold bg-gradient-to-r from-gray-800 to-purple-800 bg-clip-text text-transparent text-xs">
-                  {comment.nickname || '匿名'}
-                </span>
-                <span className="text-purple-500/70 text-xs font-medium">
-                  @{comment.nickname?.toLowerCase().replace(/\s+/g, '') || 'anonymous'}
-                </span>
-                <span className="text-gray-400">·</span>
-                <span className="text-gray-500/70 text-xs font-medium">
-                  {formatDistanceToNow(new Date(comment.created_at), { 
-                    addSuffix: true, 
-                    locale: ja 
-                  })}
-                </span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="font-semibold bg-gradient-to-r from-gray-800 to-purple-800 bg-clip-text text-transparent text-xs">
+                    {comment.nickname || '匿名'}
+                  </span>
+                  <span className="text-purple-500/70 text-xs font-medium">
+                    @{comment.nickname?.toLowerCase().replace(/\s+/g, '') || 'anonymous'}
+                  </span>
+                  <span className="text-gray-400">·</span>
+                  <span className="text-gray-500/70 text-xs font-medium">
+                    {formatDistanceToNow(new Date(comment.created_at), { 
+                      addSuffix: true, 
+                      locale: ja 
+                    })}
+                  </span>
+                </div>
+                {canDeleteComment(comment) && (
+                  <button
+                    onClick={() => handleDeleteComment(comment.id)}
+                    className="p-1.5 rounded-lg hover:bg-red-50 hover:text-red-600 transition-all duration-200 text-gray-400 hover:shadow-sm"
+                    title="コメントを削除"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                )}
               </div>
               <p className="text-gray-800 text-xs mt-1 leading-relaxed font-medium">
                 {comment.content}
