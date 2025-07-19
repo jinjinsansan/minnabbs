@@ -589,7 +589,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
           {activeTab === 'privacy' && (
             <div className="space-y-4 sm:space-y-6 bg-gradient-to-br from-green-50/50 to-emerald-50/50 rounded-2xl p-4 sm:p-6">
               <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-6 border-2 border-green-200 rounded-xl bg-white/70 shadow-lg space-y-3 sm:space-y-0">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-6 pr-6 sm:pr-8 border-2 border-green-200 rounded-xl bg-white/70 shadow-lg space-y-3 sm:space-y-0">
                   <div>
                     <h3 className="font-semibold text-green-800">プロフィールを公開</h3>
                     <p className="text-sm text-green-600 font-medium">
@@ -603,7 +603,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
                       onChange={(e) => setIsPublic(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-12 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-green-400 peer-checked:to-emerald-400 shadow-sm"></div>
+                    <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-green-400 peer-checked:to-emerald-400 shadow-sm"></div>
                   </label>
                 </div>
 
@@ -634,7 +634,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
           {activeTab === 'notifications' && (
             <div className="space-y-4 sm:space-y-6 bg-gradient-to-br from-orange-50/50 to-amber-50/50 rounded-2xl p-4 sm:p-6">
               <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-6 border-2 border-orange-200 rounded-xl bg-white/70 shadow-lg space-y-3 sm:space-y-0">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-6 pr-6 sm:pr-8 border-2 border-orange-200 rounded-xl bg-white/70 shadow-lg space-y-3 sm:space-y-0">
                   <div>
                     <h3 className="font-semibold text-orange-800">メール通知</h3>
                     <p className="text-sm text-orange-600 font-medium">
@@ -648,7 +648,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
                       onChange={(e) => setEmailNotifications(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-12 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-orange-400 peer-checked:to-amber-400 shadow-sm"></div>
+                    <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-orange-400 peer-checked:to-amber-400 shadow-sm"></div>
                   </label>
                 </div>
 
