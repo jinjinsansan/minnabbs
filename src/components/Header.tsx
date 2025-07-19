@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { Shield, Settings, Menu, X, ExternalLink, LogIn, LogOut, User } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
-import AdminLogin from './AdminLogin'
 import ElegantHeart from './ElegantHeart'
 
 // ランダムなハートカラーを取得
@@ -27,19 +26,13 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
-  const { user, profile, loginAsAdmin, logout, signInWithGoogle, signOut } = useAuth()
+  const { user, profile, logout, signInWithGoogle, signOut } = useAuth()
   const [showMobileMenu, setShowMobileMenu] = useState(false)
-  const [showAdminLogin, setShowAdminLogin] = useState(false)
   const [isSigningIn, setIsSigningIn] = useState(false)
 
   console.log('Header render - onProfileClick:', onProfileClick, 'user:', user, 'profile:', profile)
 
-  const handleAdminLogin = (isAdmin: boolean) => {
-    if (isAdmin) {
-      loginAsAdmin()
-      setShowAdminLogin(false)
-    }
-  }
+
 
   const handleLogout = () => {
     signOut()
@@ -135,16 +128,7 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
               </button>
             )}
             
-            {/* 管理者ログインボタン（通常ユーザーがログイン済みの場合のみ表示） */}
-            {user && !profile?.is_admin && (
-              <button
-                onClick={() => setShowAdminLogin(true)}
-                className="flex items-center space-x-2 px-3 py-2 text-orange-600 hover:text-orange-800 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 border border-orange-200/30"
-              >
-                <Shield className="w-4 h-4" />
-                <span className="text-sm font-medium">管理者</span>
-              </button>
-            )}
+
           </div>
 
           {/* Mobile Menu Button */}
@@ -216,18 +200,7 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
                     </button>
                   )}
                   
-                  {!profile?.is_admin && (
-                    <button
-                      onClick={() => {
-                        setShowAdminLogin(true)
-                        setShowMobileMenu(false)
-                      }}
-                      className="nav-item w-full text-left"
-                    >
-                      <Shield className="w-5 h-5" />
-                      <span>管理者ログイン</span>
-                    </button>
-                  )}
+
                   
                   <button
                     onClick={handleLogout}
@@ -262,13 +235,7 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
       </div>
       </header>
 
-      {/* Admin Login Modal */}
-      {showAdminLogin && (
-        <AdminLogin
-          onLogin={handleAdminLogin}
-          onClose={() => setShowAdminLogin(false)}
-        />
-      )}
+
     </>
   )
 }

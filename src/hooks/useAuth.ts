@@ -58,8 +58,9 @@ export const useAuth = () => {
           console.log('User in auth state change, fetching profile...')
           await fetchProfile(session.user.id)
         } else {
-          console.log('No user in auth state change, clearing profile')
-          setProfile(null)
+          console.log('No user in auth state change, checking admin login status')
+          // セッションがない場合でも管理者ログイン状態をチェック
+          checkAdminLoginStatus()
         }
         
         setLoading(false)
@@ -182,12 +183,16 @@ export const useAuth = () => {
   }
 
   const checkAdminLoginStatus = () => {
+    console.log('Checking admin login status...')
     // ローカルストレージから管理者ログイン状態をチェック
     const adminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true'
     const adminEmail = localStorage.getItem('adminEmail')
     
+    console.log('adminLoggedIn:', adminLoggedIn)
+    console.log('adminEmail:', adminEmail)
+    
     if (adminLoggedIn && adminEmail === 'jin@namisapo.com') {
-      console.log('Admin login status found in localStorage')
+      console.log('Admin login status found in localStorage, setting admin profile')
       // 管理者プロフィールを作成
       const adminProfile = {
         id: 'admin-user',
@@ -199,13 +204,19 @@ export const useAuth = () => {
       }
       setProfile(adminProfile)
       setUser({ id: 'admin-user', email: adminEmail } as any)
+      console.log('Admin profile and user set successfully')
+    } else {
+      console.log('No admin login status found or invalid credentials')
     }
   }
 
   const loginAsAdmin = () => {
+    console.log('loginAsAdmin called')
     // 管理者ログイン状態をローカルストレージに保存
     localStorage.setItem('adminLoggedIn', 'true')
     localStorage.setItem('adminEmail', 'jin@namisapo.com')
+    
+    console.log('Admin login state saved to localStorage')
     
     // 管理者プロフィールを設定
     const adminProfile = {
@@ -218,6 +229,7 @@ export const useAuth = () => {
     }
     setProfile(adminProfile)
     setUser({ id: 'admin-user', email: 'jin@namisapo.com' } as any)
+    console.log('Admin profile and user set in state')
   }
 
   const logout = () => {

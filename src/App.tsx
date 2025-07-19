@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Routes, Route, useParams, useNavigate } from 'react-router-dom'
-import { RefreshCw, TrendingUp } from 'lucide-react'
+import { RefreshCw, TrendingUp, Shield } from 'lucide-react'
 import Header from './components/Header'
 import DiaryCard from './components/DiaryCard'
 import SearchFilter, { FilterOptions } from './components/SearchFilter'
@@ -418,6 +418,17 @@ const BoardPage: React.FC = () => {
                   </div>
                   
                   <div className="flex items-center space-x-2 sm:space-x-3">
+                    {/* 管理者ログインボタン（通常ユーザーがログイン済みの場合のみ表示） */}
+                    {user && !profile?.is_admin && (
+                      <button
+                        onClick={() => setShowAdminLogin(true)}
+                        className="flex items-center space-x-2 px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 border-2 border-orange-300"
+                      >
+                        <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span>管理者</span>
+                      </button>
+                    )}
+                    
                     {/* テストデータ切り替えボタン */}
                     <button
                       onClick={() => {
@@ -511,7 +522,9 @@ const BoardPage: React.FC = () => {
       {showAdminLogin && (
         <AdminLogin 
           onLogin={(isAdmin) => {
+            console.log('AdminLogin onLogin called with isAdmin:', isAdmin)
             if (isAdmin) {
+              console.log('Setting showAdminLogin to false and showAdminPanel to true')
               setShowAdminLogin(false)
               setShowAdminPanel(true)
             }
