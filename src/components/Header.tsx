@@ -29,14 +29,24 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
   const { user, profile, logout, signInWithGoogle, signOut } = useAuth()
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [isSigningIn, setIsSigningIn] = useState(false)
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
   console.log('Header render - onProfileClick:', onProfileClick, 'user:', user, 'profile:', profile)
 
 
 
   const handleLogout = () => {
+    setShowLogoutConfirm(true)
+  }
+
+  const confirmLogout = () => {
     signOut()
     setShowMobileMenu(false)
+    setShowLogoutConfirm(false)
+  }
+
+  const cancelLogout = () => {
+    setShowLogoutConfirm(false)
   }
 
   const handleGoogleSignIn = async () => {
@@ -235,7 +245,38 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
       </div>
       </header>
 
-
+      {/* Logout Confirmation Dialog */}
+      {showLogoutConfirm && (
+        <div className="modal-overlay">
+          <div className="bg-gradient-to-br from-white/95 to-red-50/95 backdrop-blur-md rounded-3xl border-2 border-red-200/50 max-w-md w-full shadow-2xl">
+            <div className="p-8 text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-pink-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <LogOut className="w-8 h-8 text-red-500" />
+              </div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent mb-3">
+                ログアウト確認
+              </h2>
+              <p className="text-gray-600 mb-6 font-medium">
+                本当にログアウトしますか？
+              </p>
+              <div className="flex space-x-4">
+                <button 
+                  onClick={cancelLogout}
+                  className="flex-1 bg-white/70 text-gray-700 px-6 py-3 rounded-2xl font-semibold hover:bg-white transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 border-2 border-gray-200/50"
+                >
+                  キャンセル
+                </button>
+                <button 
+                  onClick={confirmLogout}
+                  className="flex-1 bg-gradient-to-r from-red-500 to-pink-500 text-white px-6 py-3 rounded-2xl font-semibold hover:from-red-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  ログアウト
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
