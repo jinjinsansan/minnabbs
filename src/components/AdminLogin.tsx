@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Shield, Eye, EyeOff, Lock, Mail, AlertTriangle } from 'lucide-react'
+import { useAuth } from '../hooks/useAuth'
 
 interface AdminLoginProps {
   onLogin: (isAdmin: boolean) => void
@@ -12,6 +13,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onClose }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const { loginAsAdmin } = useAuth()
 
   // 管理者アカウント情報
   const ADMIN_CREDENTIALS = {
@@ -28,8 +30,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onClose }) => {
       // 認証チェック
       if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
         // ログイン成功
-        localStorage.setItem('adminLoggedIn', 'true')
-        localStorage.setItem('adminEmail', email)
+        loginAsAdmin()
         onLogin(true)
       } else {
         setError('メールアドレスまたはパスワードが正しくありません')

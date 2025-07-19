@@ -5,6 +5,7 @@ import Header from './components/Header'
 import DiaryCard from './components/DiaryCard'
 import SearchFilter, { FilterOptions } from './components/SearchFilter'
 import AdminPanel from './components/AdminPanel'
+import AdminLogin from './components/AdminLogin'
 import ProfilePage from './components/ProfilePage'
 import { useAuth } from './hooks/useAuth'
 import { supabase, Database } from './lib/supabase'
@@ -154,6 +155,7 @@ const BoardPage: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [showAdminPanel, setShowAdminPanel] = useState(false)
+  const [showAdminLogin, setShowAdminLogin] = useState(false)
   const [showProfilePage, setShowProfilePage] = useState(false)
   const [filteredDiaries, setFilteredDiaries] = useState<DiaryEntry[]>([])
   const [searchFilters, setSearchFilters] = useState<FilterOptions>({
@@ -389,7 +391,11 @@ const BoardPage: React.FC = () => {
         <Header 
           onAdminClick={() => {
             console.log('Admin button clicked')
-            setShowAdminPanel(true)
+            if (profile?.is_admin) {
+              setShowAdminPanel(true)
+            } else {
+              setShowAdminLogin(true)
+            }
           }}
           onProfileClick={() => {
             console.log('Profile button clicked, showProfilePage:', showProfilePage)
@@ -500,6 +506,19 @@ const BoardPage: React.FC = () => {
           </div>
         </main>
       </div>
+
+      {/* Admin Login */}
+      {showAdminLogin && (
+        <AdminLogin 
+          onLogin={(isAdmin) => {
+            if (isAdmin) {
+              setShowAdminLogin(false)
+              setShowAdminPanel(true)
+            }
+          }}
+          onClose={() => setShowAdminLogin(false)}
+        />
+      )}
 
       {/* Admin Panel */}
       {showAdminPanel && (

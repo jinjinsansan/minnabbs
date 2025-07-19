@@ -33,6 +33,8 @@ export const useAuth = () => {
           await fetchProfile(session.user.id)
         } else {
           console.log('No user in session')
+          // ユーザーがログインしていない場合でも、管理者ログイン状態をチェック
+          checkAdminLoginStatus()
         }
         
         setLoading(false)
@@ -179,15 +181,43 @@ export const useAuth = () => {
     }
   }
 
+  const checkAdminLoginStatus = () => {
+    // ローカルストレージから管理者ログイン状態をチェック
+    const adminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true'
+    const adminEmail = localStorage.getItem('adminEmail')
+    
+    if (adminLoggedIn && adminEmail === 'jin@namisapo.com') {
+      console.log('Admin login status found in localStorage')
+      // 管理者プロフィールを作成
+      const adminProfile = {
+        id: 'admin-user',
+        email: adminEmail,
+        display_name: '管理者',
+        avatar_url: null,
+        is_admin: true,
+        created_at: new Date().toISOString()
+      }
+      setProfile(adminProfile)
+      setUser({ id: 'admin-user', email: adminEmail } as any)
+    }
+  }
+
   const loginAsAdmin = () => {
     // 管理者ログイン状態をローカルストレージに保存
     localStorage.setItem('adminLoggedIn', 'true')
     localStorage.setItem('adminEmail', 'jin@namisapo.com')
     
     // 管理者プロフィールを設定
-    if (profile) {
-      setProfile({ ...profile, is_admin: true })
+    const adminProfile = {
+      id: 'admin-user',
+      email: 'jin@namisapo.com',
+      display_name: '管理者',
+      avatar_url: null,
+      is_admin: true,
+      created_at: new Date().toISOString()
     }
+    setProfile(adminProfile)
+    setUser({ id: 'admin-user', email: 'jin@namisapo.com' } as any)
   }
 
   const logout = () => {
