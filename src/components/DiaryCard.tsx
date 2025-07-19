@@ -64,12 +64,41 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(0)
   const [commentCount, setCommentCount] = useState(0)
+  const [userProfile, setUserProfile] = useState<{ display_name: string | null } | null>(null)
   const { user } = useAuth()
   const colors = getEmotionColorClasses(diary.emotion) // 感情に応じた色を取得
 
   const isOwner = currentUserId === diary.user_id
   const canEdit = isOwner || isAdmin
   const canDelete = isOwner || isAdmin
+
+  // ユーザープロフィールを取得
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!diary.user_id) return
+      
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('id', diary.user_id)
+          .single()
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error fetching user profile:', error)
+          return
+        }
+
+        if (data) {
+          setUserProfile(data)
+        }
+      } catch (error) {
+        console.error('Error in fetchUserProfile:', error)
+      }
+    }
+
+    fetchUserProfile()
+  }, [diary.user_id])
 
   // いいねの状態と数を取得
   useEffect(() => {
@@ -145,12 +174,20 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
     return emotions[emotion || ''] || null
   }
 
-  // 表示名を決定する関数
+  // 表示名を決定する関数（プロフィールページの最新情報を優先）
   const getDisplayName = () => {
-    if (diary.nickname) {
-      return diary.nickname // 投稿時に設定された表示名
+    // 1. プロフィールページで設定された最新の表示名を優先
+    if (userProfile?.display_name) {
+      return userProfile.display_name
     }
-    return '匿名' // 匿名の場合
+    
+    // 2. 投稿時に設定された表示名
+    if (diary.nickname) {
+      return diary.nickname
+    }
+    
+    // 3. デフォルト
+    return '匿名'
   }
 
   const handleDelete = () => {
@@ -240,9 +277,6 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
             >
               {getDisplayName()}
             </button>
-            <span className="text-gray-500/80 text-xs sm:text-sm font-medium">
-              @{getDisplayName().toLowerCase().replace(/\s+/g, '') || 'anonymous'}
-            </span>
             <span className="text-gray-400 hidden sm:inline">·</span>
             <span className="text-gray-600 text-xs bg-gradient-to-r from-white/80 to-gray-50/80 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border border-gray-200/50 shadow-sm font-medium">
               {diary.created_at && new Date(diary.created_at).toLocaleDateString('ja-JP', {

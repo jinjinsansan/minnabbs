@@ -150,9 +150,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
                   <span className="font-semibold bg-gradient-to-r from-gray-800 to-purple-800 bg-clip-text text-transparent text-xs">
                     {comment.nickname || '匿名'}
                   </span>
-                  <span className="text-purple-500/70 text-xs font-medium hidden sm:inline">
-                    @{comment.nickname?.toLowerCase().replace(/\s+/g, '') || 'anonymous'}
-                  </span>
                   <span className="text-gray-400 hidden sm:inline">·</span>
                   <span className="text-gray-500/70 text-xs font-medium">
                     {formatDistanceToNow(new Date(comment.created_at), { 
