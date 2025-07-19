@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { MessageCircle, MoreHorizontal, Edit, Trash2, Share } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { ja } from 'date-fns/locale'
 import { Database } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
 import CommentSection from './CommentSection'
 import EditDiaryModal from './EditDiaryModal'
 import ElegantHeart from './ElegantHeart'
@@ -59,13 +60,44 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
   const [showMenu, setShowMenu] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [liked, setLiked] = useState(false)
-  const [likeCount, setLikeCount] = useState(Math.floor(Math.random() * 50) + 1) // テスト用のランダムないいね数
+  const [likeCount, setLikeCount] = useState(0)
   const { user } = useAuth()
   const colors = getEmotionColorClasses(diary.emotion) // 感情に応じた色を取得
 
   const isOwner = currentUserId === diary.user_id
   const canEdit = isOwner || isAdmin
   const canDelete = isOwner || isAdmin
+
+  // いいねの状態と数を取得
+  useEffect(() => {
+    const fetchLikeStatus = async () => {
+      try {
+        // いいね数を取得
+        const { count: likeCountResult } = await supabase
+          .from('likes')
+          .select('*', { count: 'exact', head: true })
+          .eq('diary_id', diary.id)
+
+        setLikeCount(likeCountResult || 0)
+
+        // 現在のユーザーがいいねしているかチェック
+        if (user) {
+          const { data: userLike } = await supabase
+            .from('likes')
+            .select('*')
+            .eq('diary_id', diary.id)
+            .eq('user_id', user.id)
+            .single()
+
+          setLiked(!!userLike)
+        }
+      } catch (error) {
+        console.error('Error fetching like status:', error)
+      }
+    }
+
+    fetchLikeStatus()
+  }, [diary.id, user])
 
   const getEmotionDisplay = (emotion: string | null) => {
     const emotions: Record<string, { label: string; color: string }> = {
@@ -108,18 +140,42 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
     setShowEditModal(false)
   }
 
-  const handleLike = () => {
+  const handleLike = async () => {
     if (!user) {
       alert('いいね！するにはログインが必要です。')
       return
     }
     
-    if (liked) {
-      setLiked(false)
-      setLikeCount(prev => prev - 1)
-    } else {
-      setLiked(true)
-      setLikeCount(prev => prev + 1)
+    try {
+      if (liked) {
+        // いいねを削除
+        const { error } = await supabase
+          .from('likes')
+          .delete()
+          .eq('diary_id', diary.id)
+          .eq('user_id', user.id)
+
+        if (error) throw error
+        
+        setLiked(false)
+        setLikeCount(prev => prev - 1)
+      } else {
+        // いいねを追加
+        const { error } = await supabase
+          .from('likes')
+          .insert([{
+            diary_id: diary.id,
+            user_id: user.id
+          }])
+
+        if (error) throw error
+        
+        setLiked(true)
+        setLikeCount(prev => prev + 1)
+      }
+    } catch (error) {
+      console.error('Error handling like:', error)
+      alert('いいねの処理に失敗しました')
     }
   }
 
