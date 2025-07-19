@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Shield, Settings, Menu, X, ExternalLink, LogIn, LogOut, User } from 'lucide-react'
+import { Shield, Settings, Menu, X, LogOut, User } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import ElegantHeart from './ElegantHeart'
 
@@ -26,7 +26,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
-  const { user, profile, logout, signInWithGoogle, signOut } = useAuth()
+  const { user, profile, signInWithGoogle, signOut } = useAuth()
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [isSigningIn, setIsSigningIn] = useState(false)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
@@ -39,10 +39,17 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
     setShowLogoutConfirm(true)
   }
 
-  const confirmLogout = () => {
-    signOut()
-    setShowMobileMenu(false)
-    setShowLogoutConfirm(false)
+  const confirmLogout = async () => {
+    try {
+      console.log('confirmLogout called')
+      await signOut()
+      setShowMobileMenu(false)
+      setShowLogoutConfirm(false)
+      console.log('Logout completed successfully')
+    } catch (error) {
+      console.error('Logout failed:', error)
+      alert('ログアウトに失敗しました')
+    }
   }
 
   const cancelLogout = () => {
@@ -170,19 +177,19 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
         {showMobileMenu && (
           <div className="md:hidden border-t border-purple-200/50 py-4 bg-gradient-to-r from-white/90 to-purple-50/90 backdrop-blur-md">
             <div className="space-y-4 px-4">
-              {/* かんじょうにっきに戻るボタン（モバイル） */}
-              <a
-                href="https://apps.namisapo2.love"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center space-x-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-red-600 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 w-full justify-center"
-                onClick={() => setShowMobileMenu(false)}
-              >
-                <span className="text-sm">かんじょうにっきに戻る</span>
-              </a>
-
               {user ? (
                 <>
+                  {/* かんじょうにっきに戻るボタン（ログイン後のみ） */}
+                  <a
+                    href="https://apps.namisapo2.love"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-red-600 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 w-full justify-center"
+                    onClick={() => setShowMobileMenu(false)}
+                  >
+                    <span className="text-sm">かんじょうにっきに戻る</span>
+                  </a>
+
                   <button
                     onClick={() => {
                       console.log('Mobile profile button clicked')

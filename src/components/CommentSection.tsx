@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Send } from 'lucide-react'
 import { supabase, Database } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
@@ -37,11 +37,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, useTestData = 
   const [isAnonymous, setIsAnonymous] = useState(false)
   const { user, profile } = useAuth()
 
-  useEffect(() => {
-    fetchComments()
-  }, [diaryId, useTestData])
-
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     if (useTestData) {
       // テストデータモードの場合は、ローカルストレージからコメントを取得
       const storedComments = localStorage.getItem(`comments_${diaryId}`)
@@ -65,7 +61,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, useTestData = 
     } catch (error) {
       console.error('Error fetching comments:', error)
     }
-  }
+  }, [diaryId, useTestData])
+
+  useEffect(() => {
+    fetchComments()
+  }, [fetchComments])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

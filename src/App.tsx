@@ -80,7 +80,7 @@ const DiaryDetailPage: React.FC = () => {
     }
   }, [diaryId])
 
-  const handleDeleteDiary = async (diaryId: string) => {
+  const handleDeleteDiary = async () => {
     // 削除後はホームに戻る
     navigate('/')
   }
@@ -158,13 +158,13 @@ const BoardPage: React.FC = () => {
   const [showAdminLogin, setShowAdminLogin] = useState(false)
   const [showProfilePage, setShowProfilePage] = useState(false)
   const [filteredDiaries, setFilteredDiaries] = useState<DiaryEntry[]>([])
-  const [searchFilters, setSearchFilters] = useState<FilterOptions>({
-    keyword: '',
-    username: '',
-    emotion: '',
-    dateFrom: '',
-    dateTo: ''
-  })
+  // const [_searchFilters, setSearchFilters] = useState<FilterOptions>({
+  //   keyword: '',
+  //   username: '',
+  //   emotion: '',
+  //   dateFrom: '',
+  //   dateTo: ''
+  // })
   const [useTestData, setUseTestData] = useState(true) // テストデータを使用
   const { user, profile, loading: authLoading } = useAuth()
 
@@ -187,7 +187,7 @@ const BoardPage: React.FC = () => {
     } else {
       console.log('Still loading auth...')
     }
-  }, [authLoading]) // useTestDataを依存関係から削除
+  }, [authLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchDiaries = async () => {
     try {
@@ -318,7 +318,7 @@ const BoardPage: React.FC = () => {
   }
 
   const handleFilterChange = (filters: FilterOptions) => {
-    setSearchFilters(filters)
+    // setSearchFilters(filters)
     
     let filtered = [...diaries]
     

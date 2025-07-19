@@ -62,7 +62,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
   const [showEditModal, setShowEditModal] = useState(false)
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(Math.floor(Math.random() * 50) + 1) // テスト用のランダムないいね数
-  const { user, profile } = useAuth()
+  const { user } = useAuth()
   const colors = getEmotionColorClasses(diary.emotion) // 感情に応じた色を取得
 
   const isOwner = currentUserId === diary.user_id
@@ -131,7 +131,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
       return
     }
     
-    const diaryUrl = `${window.location.origin}/diary/${diary.id}`
+    // const _diaryUrl = `${window.location.origin}/diary/${diary.id}`
     const shareText = `${getDisplayName()}さんの日記\n\n${diary.content?.substring(0, 50)}${diary.content && diary.content.length > 50 ? '...' : ''}\n\n#かんじょうにっき仲間で繋がりたい\n#かんじょうにっき #感情日記 #自己肯定感 #みんなにっき`
     const shareUrl = 'https://namisapo.vercel.app/'
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`

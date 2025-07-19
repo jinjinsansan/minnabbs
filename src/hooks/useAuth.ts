@@ -56,6 +56,19 @@ export const useAuth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session)
+        
+        if (event === 'SIGNED_OUT') {
+          console.log('User signed out, clearing all state')
+          setSession(null)
+          setUser(null)
+          setProfile(null)
+          setIsAdminMode(false)
+          localStorage.removeItem('adminLoggedIn')
+          localStorage.removeItem('adminEmail')
+          setLoading(false)
+          return
+        }
+        
         setSession(session)
         setUser(session?.user ?? null)
         
@@ -82,7 +95,7 @@ export const useAuth = () => {
     )
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -242,7 +255,7 @@ export const useAuth = () => {
       if (user) {
         setUser({ ...user, email: adminEmail })
       } else {
-        setUser({ id: currentUserId, email: adminEmail } as any)
+        setUser({ id: currentUserId, email: adminEmail } as User)
       }
       
       console.log('Admin profile and user set successfully with ID:', currentUserId)
@@ -281,7 +294,7 @@ export const useAuth = () => {
     if (user) {
       setUser({ ...user, email: 'jin@namisapo.com' })
     } else {
-      setUser({ id: currentUserId, email: 'jin@namisapo.com' } as any)
+      setUser({ id: currentUserId, email: 'jin@namisapo.com' } as User)
     }
     
     console.log('Admin profile and user set in state with ID:', currentUserId)
@@ -323,16 +336,29 @@ export const useAuth = () => {
 
   const signOut = async () => {
     try {
+      console.log('signOut called - clearing all state')
+      
+      // まずローカル状態をクリア
+      setIsAdminMode(false)
+      localStorage.removeItem('adminLoggedIn')
+      localStorage.removeItem('adminEmail')
+      setProfile(null)
+      setUser(null)
+      setSession(null)
+      setLoading(false)
+      
+      console.log('Local state cleared, now signing out from Supabase')
+      
       const { error } = await supabase.auth.signOut()
       if (error) {
         console.error('Error signing out:', error)
         throw error
       }
       
-      // ローカル状態もクリア
-      logout()
+      console.log('Supabase sign out successful')
     } catch (error) {
       console.error('Sign out error:', error)
+      // エラーが発生してもローカル状態はクリアされているので、再度クリアは不要
       throw error
     }
   }

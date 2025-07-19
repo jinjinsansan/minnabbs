@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Camera, Save, X, User, Mail, Calendar, Shield, Settings, Upload, Trash2, Edit, Send, Sparkles, Heart, Star } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import { Save, X, User, Mail, Calendar, Shield, Settings, Upload, Trash2, Send, Sparkles, Heart, Star } from 'lucide-react'
 import { formatDate } from '../utils/dateUtils'
 import ElegantHeart from './ElegantHeart'
 import { Database } from '../lib/supabase'
@@ -10,8 +9,8 @@ type DiaryEntry = Database['public']['Tables']['diary']['Row']
 interface ProfilePageProps {
   onClose: () => void
   onNewPost?: (post: Omit<DiaryEntry, 'id' | 'created_at'>) => void
-  user: any
-  profile: any
+  user: { id: string; email?: string } | null
+  profile: { display_name?: string; avatar_url?: string; email?: string; created_at?: string; is_admin?: boolean } | null
 }
 
 const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, profile }) => {
@@ -27,7 +26,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
   const [avatarUrl, setAvatarUrl] = useState('')
   const [isPublic, setIsPublic] = useState(true)
   const [emailNotifications, setEmailNotifications] = useState(true)
-  const [isLoading, setIsLoading] = useState(false)
+  // const [_isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<'diary' | 'profile' | 'privacy' | 'notifications'>('diary')
   

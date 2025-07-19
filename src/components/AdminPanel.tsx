@@ -6,7 +6,6 @@ import {
   UnlockKeyhole, 
   Plus,
   Search,
-  Filter,
   X,
   Shield,
   AlertTriangle,
@@ -17,29 +16,15 @@ import {
   Database as DatabaseIcon,
   Download,
   Upload,
-  Eye,
-  Edit,
-  Calendar,
   Mail,
-  Phone,
-  MapPin,
   Clock,
   TrendingUp,
-  TrendingDown,
   UserCheck,
   UserX,
-  MessageSquare,
-  Heart,
-  Star,
   Zap,
-  Globe,
   Lock,
-  Key,
   Bell,
-  Palette,
-  Monitor,
-  Smartphone,
-  Tablet
+  Palette
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { Database } from '../lib/supabase'
@@ -109,7 +94,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
       fetchPosts()
       calculateStats()
     }
-  }, [profile])
+  }, [profile]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchUsers = async () => {
     try {
@@ -285,13 +270,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
                   システム管理とユーザー管理
                 </p>
               </div>
-            </div>
-            <button
-              onClick={onClose}
+          </div>
+          <button
+            onClick={onClose}
               className="p-3 hover:bg-white/20 rounded-2xl transition-all duration-200 backdrop-blur-sm"
-            >
+          >
               <X className="w-6 h-6 text-white" />
-            </button>
+          </button>
           </div>
         </div>
 
@@ -309,29 +294,29 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
               <BarChart3 className="w-5 h-5" />
               <span>ダッシュボード</span>
             </button>
-            <button
-              onClick={() => setActiveTab('users')}
+          <button
+            onClick={() => setActiveTab('users')}
               className={`flex items-center space-x-2 px-6 py-4 font-semibold transition-all duration-200 whitespace-nowrap ${
-                activeTab === 'users'
+              activeTab === 'users'
                   ? 'text-purple-600 border-b-2 border-purple-500 bg-purple-50/50'
                   : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50/30'
-              }`}
-            >
-              <Users className="w-5 h-5" />
-              <span>ユーザー管理</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('posts')}
+            }`}
+          >
+            <Users className="w-5 h-5" />
+            <span>ユーザー管理</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('posts')}
               className={`flex items-center space-x-2 px-6 py-4 font-semibold transition-all duration-200 whitespace-nowrap ${
-                activeTab === 'posts'
+              activeTab === 'posts'
                   ? 'text-purple-600 border-b-2 border-purple-500 bg-purple-50/50'
                   : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50/30'
-              }`}
-            >
-              <FileText className="w-5 h-5" />
-              <span>投稿管理</span>
-            </button>
-            <button
+            }`}
+          >
+            <FileText className="w-5 h-5" />
+            <span>投稿管理</span>
+          </button>
+          <button
               onClick={() => setActiveTab('settings')}
               className={`flex items-center space-x-2 px-6 py-4 font-semibold transition-all duration-200 whitespace-nowrap ${
                 activeTab === 'settings'
@@ -363,7 +348,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
             >
               <DatabaseIcon className="w-5 h-5" />
               <span>バックアップ</span>
-            </button>
+          </button>
           </div>
         </div>
 
@@ -473,7 +458,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
           {/* Users Tab */}
           {activeTab === 'users' && (
             <div className="space-y-6">
-              {/* Search */}
+          {/* Search */}
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-400" />
                 <input
@@ -486,30 +471,30 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
               </div>
 
               {/* Users List */}
-              <div className="space-y-4">
-                {filteredUsers.map((user) => (
+            <div className="space-y-4">
+              {filteredUsers.map((user) => (
                   <div key={user.id} className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border-2 border-purple-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-100 to-pink-100 border-2 border-purple-200 flex items-center justify-center shadow-sm">
-                          <ElegantHeart className={getRandomHeartColor()} size="md" />
-                        </div>
-                        <div>
+                      <ElegantHeart className={getRandomHeartColor()} size="md" />
+                    </div>
+                    <div>
                           <div className="flex items-center space-x-2 mb-1">
                             <span className="font-bold text-gray-800">
-                              {user.display_name || '匿名'}
-                            </span>
-                            {user.is_admin && (
+                          {user.display_name || '匿名'}
+                        </span>
+                        {user.is_admin && (
                               <div className="px-2 py-1 bg-yellow-100 rounded-full">
                                 <Shield className="w-3 h-3 text-yellow-600" />
                               </div>
-                            )}
-                            {user.is_blocked && (
+                        )}
+                        {user.is_blocked && (
                               <div className="px-2 py-1 bg-red-100 rounded-full">
                                 <Ban className="w-3 h-3 text-red-600" />
                               </div>
-                            )}
-                          </div>
+                        )}
+                      </div>
                           <div className="flex items-center space-x-4 text-sm text-gray-600">
                             <div className="flex items-center space-x-1">
                               <Mail className="w-4 h-4" />
@@ -518,39 +503,39 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
                             <div className="flex items-center space-x-1">
                               <Clock className="w-4 h-4" />
                               <span>登録: {formatDistanceToNow(new Date(user.created_at), { 
-                                addSuffix: true, 
-                                locale: ja 
+                          addSuffix: true, 
+                          locale: ja 
                               })}</span>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => handleBlockUser(user.id, user.is_blocked || false)}
-                          className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                            user.is_blocked
-                              ? 'bg-green-100 text-green-700 hover:bg-green-200 shadow-md hover:shadow-lg'
-                              : 'bg-red-100 text-red-700 hover:bg-red-200 shadow-md hover:shadow-lg'
-                          }`}
-                        >
-                          {user.is_blocked ? (
-                            <>
-                              <UnlockKeyhole className="w-4 h-4" />
-                              <span>ブロック解除</span>
-                            </>
-                          ) : (
-                            <>
-                              <Ban className="w-4 h-4" />
-                              <span>ブロック</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
                     </div>
                   </div>
-                ))}
+                  
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handleBlockUser(user.id, user.is_blocked || false)}
+                          className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                        user.is_blocked
+                              ? 'bg-green-100 text-green-700 hover:bg-green-200 shadow-md hover:shadow-lg'
+                              : 'bg-red-100 text-red-700 hover:bg-red-200 shadow-md hover:shadow-lg'
+                      }`}
+                    >
+                      {user.is_blocked ? (
+                        <>
+                          <UnlockKeyhole className="w-4 h-4" />
+                          <span>ブロック解除</span>
+                        </>
+                      ) : (
+                        <>
+                          <Ban className="w-4 h-4" />
+                          <span>ブロック</span>
+                        </>
+                      )}
+                    </button>
+                      </div>
+                  </div>
+                </div>
+              ))}
               </div>
             </div>
           )}
@@ -603,47 +588,47 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
               </div>
 
               {/* Posts List */}
-              <div className="space-y-4">
-                {loading ? (
+            <div className="space-y-4">
+              {loading ? (
                   <div className="text-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto"></div>
-                  </div>
-                ) : (
-                  filteredPosts.map((post) => (
+                </div>
+              ) : (
+                filteredPosts.map((post) => (
                     <div key={post.id} className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border-2 border-purple-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
                           <div className="flex items-center space-x-3 mb-3">
                             <span className="font-bold text-gray-800">
-                              {post.nickname || '匿名'}
-                            </span>
-                            <span className="text-gray-500 text-sm">
-                              {post.created_at && formatDistanceToNow(new Date(post.created_at), { 
-                                addSuffix: true, 
-                                locale: ja 
-                              })}
-                            </span>
+                            {post.nickname || '匿名'}
+                          </span>
+                          <span className="text-gray-500 text-sm">
+                            {post.created_at && formatDistanceToNow(new Date(post.created_at), { 
+                              addSuffix: true, 
+                              locale: ja 
+                            })}
+                          </span>
                             {post.nickname === '管理者' && (
                               <div className="px-2 py-1 bg-yellow-100 rounded-full">
                                 <Shield className="w-3 h-3 text-yellow-600" />
                               </div>
                             )}
-                          </div>
-                          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                            {post.content}
-                          </p>
                         </div>
-                        <button
-                          onClick={() => handleDeletePost(post.id)}
+                          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                          {post.content}
+                        </p>
+                        </div>
+                      <button
+                        onClick={() => handleDeletePost(post.id)}
                           className="flex items-center space-x-2 px-3 py-2 bg-red-100 text-red-700 rounded-xl hover:bg-red-200 transition-all duration-200 shadow-sm hover:shadow-md"
-                        >
-                          <Trash2 className="w-4 h-4" />
+                      >
+                        <Trash2 className="w-4 h-4" />
                           <span className="text-sm font-medium">削除</span>
-                        </button>
-                      </div>
+                      </button>
                     </div>
-                  ))
-                )}
+                  </div>
+                ))
+              )}
               </div>
             </div>
           )}
@@ -825,8 +810,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
                       全データをエクスポート
                     </button>
                   </div>
-                </div>
-
+              </div>
+              
                 <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border-2 border-purple-200/50 shadow-lg">
                   <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center space-x-2">
                     <Upload className="w-5 h-5 text-purple-600" />
@@ -840,7 +825,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
                     </div>
                     <button className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-red-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
                       データを復元
-                    </button>
+              </button>
                   </div>
                 </div>
               </div>
