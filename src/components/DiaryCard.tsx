@@ -16,6 +16,7 @@ interface DiaryCardProps {
   currentUserId?: string
   isAdmin?: boolean
   showFullContent?: boolean
+  useTestData?: boolean
   onDelete?: (id: string) => void
   onUpdate?: (id: string, updates: Partial<DiaryEntry>) => void
 }
@@ -52,6 +53,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
   currentUserId, 
   isAdmin = false,
   showFullContent = false,
+  useTestData = false,
   onDelete,
   onUpdate
 }) => {
@@ -290,7 +292,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
           {/* Comments */}
           {showComments && (
             <div className="mt-6 border-t border-gray-200/50 pt-6 bg-gradient-to-br from-gray-50/30 to-white/30 rounded-2xl p-4 backdrop-blur-sm">
-              <CommentSection diaryId={diary.id} />
+              <CommentSection diaryId={diary.id} useTestData={useTestData} />
             </div>
           )}
         </div>

@@ -65,6 +65,7 @@ const DiaryDetailPage: React.FC = () => {
   const navigate = useNavigate()
   const [diary, setDiary] = useState<DiaryEntry | null>(null)
   const [loading, setLoading] = useState(true)
+  const [useTestData] = useState(true) // テストデータを使用
   const { user, profile } = useAuth()
 
   useEffect(() => {
@@ -140,6 +141,7 @@ const DiaryDetailPage: React.FC = () => {
           onDelete={handleDeleteDiary}
           onUpdate={handleUpdateDiary}
           showFullContent={true}
+          useTestData={useTestData}
         />
       </main>
     </div>
@@ -463,6 +465,7 @@ const BoardPage: React.FC = () => {
                         isAdmin={profile?.is_admin || false}
                         onDelete={handleDeleteDiary}
                         onUpdate={handleUpdateDiary}
+                        useTestData={useTestData}
                       />
                     ))
                   ) : (

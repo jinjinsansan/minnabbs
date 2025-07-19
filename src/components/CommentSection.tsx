@@ -27,9 +27,10 @@ const getRandomHeartColor = () => {
 
 interface CommentSectionProps {
   diaryId: string
+  useTestData?: boolean
 }
 
-const CommentSection: React.FC<CommentSectionProps> = ({ diaryId }) => {
+const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, useTestData = false }) => {
   const [comments, setComments] = useState<Comment[]>([])
   const [newComment, setNewComment] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -38,9 +39,20 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId }) => {
 
   useEffect(() => {
     fetchComments()
-  }, [diaryId])
+  }, [diaryId, useTestData])
 
   const fetchComments = async () => {
+    if (useTestData) {
+      // テストデータモードの場合は、ローカルストレージからコメントを取得
+      const storedComments = localStorage.getItem(`comments_${diaryId}`)
+      if (storedComments) {
+        setComments(JSON.parse(storedComments))
+      } else {
+        setComments([])
+      }
+      return
+    }
+
     try {
       const { data, error } = await supabase
         .from('comments')
@@ -62,23 +74,39 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId }) => {
     setIsSubmitting(true)
     try {
       const commentData = {
+        id: `comment-${Date.now()}`,
         diary_id: diaryId,
         user_id: user.id,
         nickname: isAnonymous ? null : (profile?.display_name || '匿名'),
-        content: newComment.trim()
+        content: newComment.trim(),
+        created_at: new Date().toISOString()
       }
 
-      const { error } = await supabase
-        .from('comments')
-        .insert([commentData])
+      if (useTestData) {
+        // テストデータモードの場合は、ローカルストレージに保存
+        const newComments = [...comments, commentData]
+        setComments(newComments)
+        localStorage.setItem(`comments_${diaryId}`, JSON.stringify(newComments))
+      } else {
+        // 本番モードの場合はSupabaseに保存
+        const { error } = await supabase
+          .from('comments')
+          .insert([{
+            diary_id: diaryId,
+            user_id: user.id,
+            nickname: isAnonymous ? null : (profile?.display_name || '匿名'),
+            content: newComment.trim()
+          }])
 
-      if (error) throw error
+        if (error) throw error
+        await fetchComments()
+      }
 
       setNewComment('')
       setIsAnonymous(false)
-      await fetchComments()
     } catch (error) {
       console.error('Error adding comment:', error)
+      alert('コメントの投稿に失敗しました')
     } finally {
       setIsSubmitting(false)
     }
