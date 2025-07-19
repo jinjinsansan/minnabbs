@@ -16,7 +16,6 @@ interface DiaryCardProps {
   currentUserId?: string
   isAdmin?: boolean
   showFullContent?: boolean
-  useTestData?: boolean
   onDelete?: (id: string) => void
   onUpdate?: (id: string, updates: Partial<DiaryEntry>) => void
 }
@@ -53,7 +52,6 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
   currentUserId, 
   isAdmin = false,
   showFullContent = false,
-  useTestData = false,
   onDelete,
   onUpdate
 }) => {

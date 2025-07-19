@@ -1,0 +1,36 @@
+[build]
+  # ビルドコマンド
+  command = "npm run build"
+  # 公開ディレクトリ
+  publish = "dist"
+
+[build.environment]
+  # Node.jsのバージョン
+  NODE_VERSION = "18"
+
+# リダイレクト設定（SPA対応）
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# ヘッダー設定
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # セキュリティヘッダー
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # CORS設定
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+
+# 環境変数の設定例（実際の値はNetlifyダッシュボードで設定）
+[context.production.environment]
+  NODE_ENV = "production"
+
+[context.deploy-preview.environment]
+  NODE_ENV = "preview" 

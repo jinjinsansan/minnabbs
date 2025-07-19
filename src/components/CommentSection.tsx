@@ -27,10 +27,9 @@ const getRandomHeartColor = () => {
 
 interface CommentSectionProps {
   diaryId: string
-  useTestData?: boolean
 }
 
-const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, useTestData = false }) => {
+const CommentSection: React.FC<CommentSectionProps> = ({ diaryId }) => {
   const [comments, setComments] = useState<Comment[]>([])
   const [newComment, setNewComment] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -38,17 +37,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, useTestData = 
   const { user, profile } = useAuth()
 
   const fetchComments = useCallback(async () => {
-    if (useTestData) {
-      // テストデータモードの場合は、ローカルストレージからコメントを取得
-      const storedComments = localStorage.getItem(`comments_${diaryId}`)
-      if (storedComments) {
-        setComments(JSON.parse(storedComments))
-      } else {
-        setComments([])
-      }
-      return
-    }
-
     try {
       const { data, error } = await supabase
         .from('comments')
@@ -61,7 +49,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, useTestData = 
     } catch (error) {
       console.error('Error fetching comments:', error)
     }
-  }, [diaryId, useTestData])
+  }, [diaryId])
 
   useEffect(() => {
     fetchComments()
@@ -73,34 +61,17 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, useTestData = 
 
     setIsSubmitting(true)
     try {
-      const commentData = {
-        id: `comment-${Date.now()}`,
-        diary_id: diaryId,
-        user_id: user.id,
-        nickname: isAnonymous ? null : (profile?.display_name || '匿名'),
-        content: newComment.trim(),
-        created_at: new Date().toISOString()
-      }
+      const { error } = await supabase
+        .from('comments')
+        .insert([{
+          diary_id: diaryId,
+          user_id: user.id,
+          nickname: isAnonymous ? null : (profile?.display_name || '匿名'),
+          content: newComment.trim()
+        }])
 
-      if (useTestData) {
-        // テストデータモードの場合は、ローカルストレージに保存
-        const newComments = [...comments, commentData]
-        setComments(newComments)
-        localStorage.setItem(`comments_${diaryId}`, JSON.stringify(newComments))
-      } else {
-        // 本番モードの場合はSupabaseに保存
-        const { error } = await supabase
-          .from('comments')
-          .insert([{
-            diary_id: diaryId,
-            user_id: user.id,
-            nickname: isAnonymous ? null : (profile?.display_name || '匿名'),
-            content: newComment.trim()
-          }])
-
-        if (error) throw error
-        await fetchComments()
-      }
+      if (error) throw error
+      await fetchComments()
 
       setNewComment('')
       setIsAnonymous(false)

@@ -12,73 +12,40 @@ import { supabase, Database } from './lib/supabase'
 
 type DiaryEntry = Database['public']['Tables']['diary']['Row']
 
-// テスト用のモックデータ
-const mockDiaries: DiaryEntry[] = [
-  {
-    id: 'test-1',
-    user_id: 'test-user-1',
-    nickname: '太郎',
-    content: '今日は久しぶりに友達と会えて本当に楽しかった！カフェで3時間も話し込んでしまった。やっぱり直接会って話すのは全然違うなあ。明日からまた頑張ろう！',
-    emotion: 'joy',
-    created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30分前
-    is_public: true
-  },
-  {
-    id: 'test-2',
-    user_id: 'test-user-2',
-    nickname: null, // 匿名
-    content: '最近仕事が忙しすぎて疲れが取れない...。でも新しいプロジェクトが始まるから頑張らないと。早く慣れるといいな。',
-    emotion: 'sadness',
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2時間前
-    is_public: true
-  },
-  {
-    id: 'test-3',
-    user_id: 'test-user-3',
-    nickname: 'みかん',
-    content: '映画館で見た新作アニメが最高だった！！！\n\n作画も音楽も声優さんの演技も全部完璧で、途中で泣いちゃった😭\n\n原作ファンとしても大満足です。みんなにもおすすめしたい！',
-    emotion: 'happiness',
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5時間前
-    is_public: true
-  },
-  {
-    id: 'test-4',
-    user_id: 'test-user-4',
-    nickname: 'ゆうき',
-    content: '電車で席を譲ろうとしたら断られてしまった。善意のつもりだったけど、相手の気持ちも考えないといけないなと反省。難しい...',
-    emotion: 'guilt',
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(), // 8時間前
-    is_public: true
-  },
-  {
-    id: 'test-5',
-    user_id: 'test-user-5',
-    nickname: null, // 匿名
-    content: '今日は雨だったけど、家でゆっくり読書できて良い一日だった。久しぶりに小説を最後まで読み切れた。次は何を読もうかな？',
-    emotion: 'gratitude',
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(), // 12時間前
-    is_public: true
-  }
-]
+
 // 個別日記ページコンポーネント
 const DiaryDetailPage: React.FC = () => {
   const { diaryId } = useParams<{ diaryId: string }>()
   const navigate = useNavigate()
   const [diary, setDiary] = useState<DiaryEntry | null>(null)
   const [loading, setLoading] = useState(true)
-  const [useTestData] = useState(true) // テストデータを使用
   const { user, profile } = useAuth()
 
   useEffect(() => {
     if (diaryId) {
-      // テストデータから該当の日記を検索
-      const foundDiary = mockDiaries.find(d => d.id === diaryId)
-      if (foundDiary) {
-        setDiary(foundDiary)
-      }
-      setLoading(false)
+      fetchDiary(diaryId)
     }
   }, [diaryId])
+
+  const fetchDiary = async (id: string) => {
+    try {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('diary')
+        .select('*')
+        .eq('id', id)
+        .eq('is_public', true)
+        .single()
+
+      if (error) throw error
+      setDiary(data)
+    } catch (error) {
+      console.error('Error fetching diary:', error)
+      navigate('/')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleDeleteDiary = async () => {
     // 削除後はホームに戻る
@@ -158,34 +125,11 @@ const BoardPage: React.FC = () => {
   const [showAdminLogin, setShowAdminLogin] = useState(false)
   const [showProfilePage, setShowProfilePage] = useState(false)
   const [filteredDiaries, setFilteredDiaries] = useState<DiaryEntry[]>([])
-  // const [_searchFilters, setSearchFilters] = useState<FilterOptions>({
-  //   keyword: '',
-  //   username: '',
-  //   emotion: '',
-  //   dateFrom: '',
-  //   dateTo: ''
-  // })
-  const [useTestData, setUseTestData] = useState(true) // テストデータを使用
   const { user, profile, loading: authLoading } = useAuth()
 
-  console.log('BoardPage render - authLoading:', authLoading, 'loading:', loading, 'user:', user, 'profile:', profile)
-
   useEffect(() => {
-    console.log('BoardPage useEffect - authLoading:', authLoading, 'useTestData:', useTestData)
     if (!authLoading) {
-      console.log('Auth loading finished, proceeding with data fetch')
-      if (useTestData) {
-        console.log('Using test data, setting diaries:', mockDiaries.length)
-        // テストデータを使用
-        setDiaries(mockDiaries)
-        setFilteredDiaries(mockDiaries)
-        setLoading(false)
-      } else {
-        console.log('Fetching diaries from Supabase')
-        fetchDiaries()
-      }
-    } else {
-      console.log('Still loading auth...')
+      fetchDiaries()
     }
   }, [authLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -215,13 +159,6 @@ const BoardPage: React.FC = () => {
   }
 
   const handleDeleteDiary = async (diaryId: string) => {
-    if (useTestData) {
-      // テストデータの場合はローカルで削除
-      setDiaries(prev => prev.filter(diary => diary.id !== diaryId))
-      setFilteredDiaries(prev => prev.filter(diary => diary.id !== diaryId))
-      return
-    }
-
     try {
       const { error } = await supabase
         .from('diary')
@@ -239,21 +176,6 @@ const BoardPage: React.FC = () => {
   }
 
   const handleUpdateDiary = async (diaryId: string, updates: Partial<DiaryEntry>) => {
-    if (useTestData) {
-      // テストデータの場合はローカルで更新
-      setDiaries(prev => 
-        prev.map(diary => 
-          diary.id === diaryId ? { ...diary, ...updates } : diary
-        )
-      )
-      setFilteredDiaries(prev => 
-        prev.map(diary => 
-          diary.id === diaryId ? { ...diary, ...updates } : diary
-        )
-      )
-      return
-    }
-
     try {
       const { error } = await supabase
         .from('diary')
@@ -278,43 +200,32 @@ const BoardPage: React.FC = () => {
     }
   }
 
-  const handleNewPost = (postData: Omit<DiaryEntry, 'id' | 'created_at'>) => {
+  const handleNewPost = async (postData: Omit<DiaryEntry, 'id' | 'created_at'>) => {
     if (!user) {
       alert('日記を投稿するにはログインが必要です')
       return
     }
 
-    // 新しい投稿を作成
-    const newPost: DiaryEntry = {
-      id: `post-${Date.now()}`,
-      created_at: new Date().toISOString(),
-      ...postData
-    }
+    try {
+      const { data, error } = await supabase
+        .from('diary')
+        .insert([postData])
+        .select()
+        .single()
 
-    if (useTestData) {
-      // テストデータの場合はローカルで追加
-      setDiaries(prev => [newPost, ...prev])
-      setFilteredDiaries(prev => [newPost, ...prev])
-    } else {
-      // 本番の場合はSupabaseに保存（実装時）
-      // TODO: Supabase実装時にここを更新
-      setDiaries(prev => [newPost, ...prev])
-      setFilteredDiaries(prev => [newPost, ...prev])
+      if (error) throw error
+
+      // 新しい投稿をリストの先頭に追加
+      setDiaries(prev => [data, ...prev])
+      setFilteredDiaries(prev => [data, ...prev])
+    } catch (error) {
+      console.error('Error creating post:', error)
+      alert('投稿に失敗しました')
     }
   }
 
   const handleRefresh = () => {
-    if (useTestData) {
-      // テストデータをリフレッシュ
-      setRefreshing(true)
-      setTimeout(() => {
-        setDiaries([...mockDiaries])
-        setFilteredDiaries([...mockDiaries])
-        setRefreshing(false)
-      }, 500)
-    } else {
-      fetchDiaries()
-    }
+    fetchDiaries()
   }
 
   const handleFilterChange = (filters: FilterOptions) => {
@@ -429,29 +340,7 @@ const BoardPage: React.FC = () => {
                       </button>
                     )}
                     
-                    {/* テストデータ切り替えボタン */}
-                    <button
-                      onClick={() => {
-                        console.log('Toggle test data, current:', useTestData)
-                        const newUseTestData = !useTestData
-                        setUseTestData(newUseTestData)
-                        if (newUseTestData) {
-                          console.log('Switching to test data')
-                          setDiaries(mockDiaries)
-                          setFilteredDiaries(mockDiaries)
-                        } else {
-                          console.log('Switching to production data')
-                          fetchDiaries()
-                        }
-                      }}
-                      className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
-                        useTestData 
-                          ? 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 border-2 border-blue-300' 
-                          : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-2 border-gray-300'
-                      }`}
-                    >
-                      {useTestData ? 'テストモード' : '本番モード'}
-                    </button>
+
                     
                     <button
                       onClick={handleRefresh}
@@ -482,7 +371,6 @@ const BoardPage: React.FC = () => {
                         isAdmin={profile?.is_admin || false}
                         onDelete={handleDeleteDiary}
                         onUpdate={handleUpdateDiary}
-                        useTestData={useTestData}
                       />
                     ))
                   ) : (
