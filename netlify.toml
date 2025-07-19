@@ -1,12 +1,12 @@
 [build]
-  # 依存関係のインストール
-  command = "npm install && npm run build"
+  # 依存関係のインストールとビルド
+  command = "npm ci && npm run build"
   # 公開ディレクトリ
   publish = "dist"
 
 [build.environment]
   # Node.jsのバージョン
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"
 
 # リダイレクト設定（SPA対応）
 [[redirects]]
