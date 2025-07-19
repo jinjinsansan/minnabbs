@@ -109,7 +109,6 @@ const DiaryDetailPage: React.FC = () => {
           onDelete={handleDeleteDiary}
           onUpdate={handleUpdateDiary}
           showFullContent={true}
-          useTestData={useTestData}
         />
       </main>
     </div>
@@ -315,7 +314,7 @@ const BoardPage: React.FC = () => {
         />
         
         <main className="main-content">
-          <div className="w-full max-w-4xl px-4 sm:px-6">
+          <div className="w-full px-4 sm:px-6">
             {/* メインコンテンツ */}
             <div className="space-y-6 sm:space-y-8">
               {/* 日記一覧 */}
@@ -435,7 +434,13 @@ const BoardPage: React.FC = () => {
           }}
           onNewPost={handleNewPost}
           user={user}
-          profile={profile}
+          profile={profile ? {
+            display_name: profile.display_name || undefined,
+            avatar_url: profile.avatar_url || undefined,
+            email: profile.email || undefined,
+            created_at: profile.created_at,
+            is_admin: profile.is_admin || undefined
+          } : null}
         />
       )}
     </div>

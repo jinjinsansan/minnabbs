@@ -343,16 +343,16 @@
   @apply bg-white rounded-2xl border border-gray-100 p-6 shadow-sm;
 }
 
-/* アプリケーション全体の中央寄せ */
+/* アプリケーション全体のレイアウト */
 .app-container {
-  @apply min-h-screen bg-gradient-to-br from-pink-50 to-blue-50 flex items-center justify-center p-4;
+  @apply min-h-screen bg-gradient-to-br from-pink-50 to-blue-50;
 }
 
 .app-content {
-  @apply w-full max-w-4xl mx-auto;
+  @apply w-full;
 }
 
-/* メインコンテンツエリアの中央寄せ */
+/* メインコンテンツエリア */
 .main-content {
-  @apply flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] py-4;
+  @apply w-full py-4;
 }
