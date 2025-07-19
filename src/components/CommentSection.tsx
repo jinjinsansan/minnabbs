@@ -36,6 +36,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
   const [newComment, setNewComment] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isAnonymous, setIsAnonymous] = useState(false)
+  const [userProfiles, setUserProfiles] = useState<Record<string, { display_name: string | null }>>({})
   const { user, profile } = useAuth()
 
   const fetchComments = useCallback(async () => {
@@ -48,10 +49,41 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
 
       if (error) throw error
       setComments(data || [])
+      
+      // コメント投稿者のプロフィール情報を取得
+      if (data && data.length > 0) {
+        const userIds = [...new Set(data.map(comment => comment.user_id).filter(Boolean))]
+        await fetchUserProfiles(userIds)
+      }
     } catch (error) {
       console.error('Error fetching comments:', error)
     }
   }, [diaryId])
+
+  // ユーザープロフィールを取得する関数
+  const fetchUserProfiles = async (userIds: string[]) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, display_name')
+        .in('id', userIds)
+
+      if (error) {
+        console.error('Error fetching user profiles:', error)
+        return
+      }
+
+      if (data) {
+        const profilesMap: Record<string, { display_name: string | null }> = {}
+        data.forEach(profile => {
+          profilesMap[profile.id] = { display_name: profile.display_name }
+        })
+        setUserProfiles(profilesMap)
+      }
+    } catch (error) {
+      console.error('Error in fetchUserProfiles:', error)
+    }
+  }
 
   // コメント数を取得する関数
   const getCommentCount = useCallback(async () => {
@@ -72,6 +104,22 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
   useEffect(() => {
     fetchComments()
   }, [fetchComments])
+
+  // コメントの表示名を決定する関数（プロフィールページの最新情報を優先）
+  const getCommentDisplayName = (comment: Comment) => {
+    // 1. プロフィールページで設定された最新の表示名を優先
+    if (comment.user_id && userProfiles[comment.user_id]?.display_name) {
+      return userProfiles[comment.user_id].display_name
+    }
+    
+    // 2. コメント投稿時に設定された表示名
+    if (comment.nickname) {
+      return comment.nickname
+    }
+    
+    // 3. デフォルト
+    return '匿名'
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -148,7 +196,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center space-x-1 sm:space-x-2 flex-wrap">
                   <span className="font-semibold bg-gradient-to-r from-gray-800 to-purple-800 bg-clip-text text-transparent text-xs">
-                    {comment.nickname || '匿名'}
+                    {getCommentDisplayName(comment)}
                   </span>
                   <span className="text-gray-400 hidden sm:inline">·</span>
                   <span className="text-gray-500/70 text-xs font-medium">
@@ -199,40 +247,30 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
                     type="checkbox"
                     checked={isAnonymous}
                     onChange={(e) => setIsAnonymous(e.target.checked)}
-                    className="rounded border-purple-300 text-purple-600 focus:ring-purple-500"
+                    className="rounded border-purple-300 text-purple-600 focus:ring-purple-500 shadow-sm w-4 h-4"
                   />
-                  <span className="text-sm text-purple-600 font-medium">匿名でコメント</span>
+                  <span className="text-xs text-purple-600 font-medium">匿名でコメント</span>
                 </label>
                 
-                <div className="flex items-center space-x-3">
-                  <span className="text-sm text-purple-500 font-medium">
-                    {280 - newComment.length}
-                  </span>
-                  <button
-                    type="submit"
-                    disabled={!newComment.trim() || isSubmitting}
-                    className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 sm:px-4 py-2 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-sm transform hover:scale-105 w-full sm:w-auto"
-                  >
-                    {isSubmitting ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <Send className="w-3 h-3 mr-1" />
-                        返信
-                      </>
-                    )}
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  disabled={!newComment.trim() || isSubmitting}
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 text-xs flex items-center space-x-2"
+                >
+                  {isSubmitting ? (
+                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Send className="w-3 h-3" />
+                  )}
+                  <span>送信</span>
+                </button>
               </div>
             </div>
           </div>
         </form>
       ) : (
-        <div className="border-t border-purple-200/50 pt-4 bg-gradient-to-br from-purple-50/50 to-white/50 backdrop-blur-sm rounded-2xl p-2 sm:p-4 mt-4 shadow-sm w-full">
-          <div className="text-center py-4">
-            <p className="text-purple-600 font-medium mb-2">コメントするにはログインが必要です</p>
-            <p className="text-gray-600 text-sm">Googleアカウントでログインして、他のユーザーと交流しましょう</p>
-          </div>
+        <div className="text-center py-4 text-sm text-gray-500 font-medium">
+          コメントを投稿するにはログインが必要です
         </div>
       )}
     </div>
