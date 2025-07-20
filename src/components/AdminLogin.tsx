@@ -31,13 +31,15 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onClose }) => {
     try {
       // 認証チェック
       if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
-        console.log('Admin credentials valid, calling loginAsAdmin')
+        console.log('Admin credentials verified')
+
         // ログイン成功
         loginAsAdmin()
-        console.log('loginAsAdmin called, calling onLogin(true)')
+        
+        console.log('Calling onLogin(true)')
         onLogin(true)
       } else {
-        console.log('Admin credentials invalid')
+        console.log('Invalid credentials')
         setError('メールアドレスまたはパスワードが正しくありません')
       }
     } catch (error) {

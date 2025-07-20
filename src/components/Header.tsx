@@ -31,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
   const [isSigningIn, setIsSigningIn] = useState(false)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
-  console.log('Header render - onProfileClick:', onProfileClick, 'user:', user, 'profile:', profile)
+
 
 
 
@@ -41,11 +41,11 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
 
   const confirmLogout = async () => {
     try {
-      console.log('confirmLogout called')
+  
       await signOut()
       setShowMobileMenu(false)
       setShowLogoutConfirm(false)
-      console.log('Logout completed successfully')
+
     } catch (error) {
       console.error('Logout failed:', error)
       alert('ログアウトに失敗しました')
@@ -79,7 +79,7 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
               <ElegantHeart className="text-white" size="md" />
             </div>
             <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              みんなにっき
+              みんなのにっき
             </h1>
           </div>
 
@@ -100,8 +100,6 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
                 {/* プロフィールボタン */}
                 <button
                   onClick={() => {
-                    console.log('Desktop profile button clicked')
-                    console.log('onProfileClick function:', onProfileClick)
                     onProfileClick?.()
                   }}
                   className="flex items-center space-x-2 bg-gradient-to-r from-white/90 to-purple-50/90 rounded-xl px-3 py-2 hover:from-white hover:to-purple-100 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 border border-purple-200/50"
@@ -193,8 +191,6 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
 
                   <button
                     onClick={() => {
-                      console.log('Mobile profile button clicked')
-                      console.log('onProfileClick function:', onProfileClick)
                       onProfileClick?.()
                       setShowMobileMenu(false)
                     }}

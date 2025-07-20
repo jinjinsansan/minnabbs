@@ -106,7 +106,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
 
   useEffect(() => {
     fetchComments()
-  }, [fetchComments])
+  }, [diaryId])
 
   // コメントの表示名を決定する関数（プロフィールページの最新情報を優先）
   const getCommentDisplayName = (comment: Comment) => {

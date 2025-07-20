@@ -22,7 +22,7 @@ export const useBlock = () => {
     } catch (error) {
       console.error('Error fetching blocked users:', error)
     }
-  }, [user])
+  }, [user?.id])
 
   // ブロック状態をチェック
   const isBlocked = useCallback((userId: string) => {
@@ -89,7 +89,7 @@ export const useBlock = () => {
 
   useEffect(() => {
     fetchBlockedUsers()
-  }, [fetchBlockedUsers])
+  }, [user?.id])
 
   return {
     blockedUsers,

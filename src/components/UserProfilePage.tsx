@@ -33,6 +33,27 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ userId, onClose }) =>
   const { isBlocked, toggleBlock, loading: blockLoading } = useBlock()
   const { user } = useAuth()
 
+  // 感情表示用の関数
+  const getEmotionDisplay = (emotion: string | null) => {
+    const emotions: Record<string, { label: string; color: string }> = {
+      // ネガティブな感情
+      'fear': { label: '恐怖', color: 'bg-purple-100 text-purple-700 border-purple-200' },
+      'sadness': { label: '悲しみ', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+      'anger': { label: '怒り', color: 'bg-red-100 text-red-700 border-red-200' },
+      'disgust': { label: '悔しい', color: 'bg-green-100 text-green-700 border-green-200' },
+      'indifference': { label: '無価値感', color: 'bg-gray-100 text-gray-700 border-gray-200' },
+      'guilt': { label: '罪悪感', color: 'bg-orange-100 text-orange-700 border-orange-200' },
+      'loneliness': { label: '寂しさ', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
+      'shame': { label: '恥ずかしさ', color: 'bg-pink-100 text-pink-700 border-pink-200' },
+      // ポジティブな感情
+      'joy': { label: '嬉しい', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
+      'gratitude': { label: '感謝', color: 'bg-teal-100 text-teal-700 border-teal-200' },
+      'achievement': { label: '達成感', color: 'bg-lime-100 text-lime-700 border-lime-200' },
+      'happiness': { label: '幸せ', color: 'bg-amber-100 text-amber-700 border-amber-200' }
+    }
+    return emotions[emotion || ''] || null
+  }
+
   // ブロックされたユーザーのプロフィールページにアクセスできないようにする
   useEffect(() => {
     if (user && isBlocked(userId)) {
@@ -297,8 +318,8 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ userId, onClose }) =>
                             {diary.created_at && new Date(diary.created_at).toLocaleDateString('ja-JP')}
                           </span>
                           {diary.emotion && (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                              {diary.emotion}
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getEmotionDisplay(diary.emotion)?.color || 'bg-purple-100 text-purple-700'}`}>
+                              {getEmotionDisplay(diary.emotion)?.label || diary.emotion}
                             </span>
                           )}
                         </div>

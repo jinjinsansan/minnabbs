@@ -29,7 +29,7 @@ export const useAuth = () => {
   // プロフィール取得関数
   const fetchProfile = useCallback(async (userId: string) => {
     try {
-      console.log('Fetching profile for user:', userId)
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -42,10 +42,10 @@ export const useAuth = () => {
       }
 
       if (data) {
-        console.log('Profile found:', data)
+
         return data
       } else {
-        console.log('Profile not found, creating new profile')
+
         return await createProfile(userId)
       }
     } catch (error) {
@@ -57,12 +57,12 @@ export const useAuth = () => {
   // プロフィール作成関数
   const createProfile = useCallback(async (userId: string) => {
     try {
-      console.log('Creating profile for user:', userId)
+
       const { data: userData } = await supabase.auth.getUser()
       const user = userData.user
       
       if (!user) {
-        console.log('No user data found')
+
         return null
       }
 
@@ -74,7 +74,7 @@ export const useAuth = () => {
         is_admin: user.email === 'jin@namisapo.com',
       }
 
-      console.log('Creating profile with data:', newProfile)
+
 
       const { data, error } = await supabase
         .from('profiles')
@@ -95,7 +95,7 @@ export const useAuth = () => {
         }
       }
 
-      console.log('Profile created successfully:', data)
+
       return data
     } catch (error) {
       console.error('Error in createProfile:', error)
@@ -107,7 +107,7 @@ export const useAuth = () => {
   useEffect(() => {
     if (isInitialized) return
 
-    console.log('useAuth useEffect started - initial setup')
+
     
     const initializeAuth = async () => {
       try {
@@ -116,15 +116,15 @@ export const useAuth = () => {
         setIsAdminMode(isAdmin)
         
         // 現在のセッションを取得
-        console.log('Getting session...')
+
         const { data: { session } } = await supabase.auth.getSession()
-        console.log('Session result:', session)
+
         
         setSession(session)
         setUser(session?.user ?? null)
         
         if (session?.user) {
-          console.log('User found, fetching profile...')
+
           if (isAdmin) {
             // 管理者モードの場合
             const adminProfile = {
@@ -159,7 +159,7 @@ export const useAuth = () => {
         
         setLoading(false)
         setIsInitialized(true)
-        console.log('Auth initialization completed')
+
       } catch (error) {
         console.error('Error in initializeAuth:', error)
         setLoading(false)
@@ -168,20 +168,20 @@ export const useAuth = () => {
     }
 
     initializeAuth()
-  }, [isInitialized, checkAdminStatus, fetchProfile])
+  }, [isInitialized, checkAdminStatus])
 
   // 認証状態変更の監視
   useEffect(() => {
     if (!isInitialized) return
 
-    console.log('Setting up auth state change listener')
+
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session)
+
         
         if (event === 'SIGNED_OUT') {
-          console.log('User signed out, clearing all state')
+
           setSession(null)
           setUser(null)
           setProfile(null)
@@ -196,7 +196,7 @@ export const useAuth = () => {
         setUser(session?.user ?? null)
         
         if (session?.user) {
-          console.log('User in auth state change, fetching profile...')
+
           const isAdmin = checkAdminStatus()
           
           if (isAdmin) {
@@ -218,7 +218,7 @@ export const useAuth = () => {
             }
           }
         } else {
-          console.log('No user in auth state change')
+
           const isAdmin = checkAdminStatus()
           if (isAdmin) {
             const adminProfile = {
@@ -235,12 +235,12 @@ export const useAuth = () => {
         }
         
         setLoading(false)
-        console.log('Loading set to false in auth state change')
+
       }
     )
 
     return () => subscription.unsubscribe()
-  }, [isInitialized, checkAdminStatus, fetchProfile])
+  }, [isInitialized, checkAdminStatus])
 
   const updateProfile = (updates: Partial<Profile>) => {
     if (profile) {
@@ -250,6 +250,7 @@ export const useAuth = () => {
 
   const loginAsAdmin = () => {
     console.log('loginAsAdmin called')
+    
     setIsAdminMode(true)
     localStorage.setItem('adminLoggedIn', 'true')
     localStorage.setItem('adminEmail', 'jin@namisapo.com')
@@ -263,6 +264,8 @@ export const useAuth = () => {
       is_admin: true,
       created_at: new Date().toISOString()
     }
+    
+    console.log('Setting admin profile:', adminProfile)
     setProfile(adminProfile)
     
     if (user) {
@@ -271,7 +274,7 @@ export const useAuth = () => {
       setUser({ id: currentUserId, email: 'jin@namisapo.com' } as User)
     }
     
-    console.log('Admin mode enabled')
+    console.log('Admin login completed')
   }
 
   const logout = () => {
@@ -305,7 +308,7 @@ export const useAuth = () => {
 
   const signOut = async () => {
     try {
-      console.log('signOut called - clearing all state')
+  
       
       setIsAdminMode(false)
       localStorage.removeItem('adminLoggedIn')
@@ -315,7 +318,7 @@ export const useAuth = () => {
       setSession(null)
       setLoading(false)
       
-      console.log('Local state cleared, now signing out from Supabase')
+
       
       const { error } = await supabase.auth.signOut()
       if (error) {
@@ -323,7 +326,7 @@ export const useAuth = () => {
         throw error
       }
       
-      console.log('Supabase sign out successful')
+
     } catch (error) {
       console.error('Sign out error:', error)
       throw error

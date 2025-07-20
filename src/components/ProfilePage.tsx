@@ -16,8 +16,7 @@ interface ProfilePageProps {
 
 const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, profile }) => {
 
-  console.log('ProfilePage - user:', user)
-  console.log('ProfilePage - profile:', profile)
+
 
   // useStateを最上位で宣言
   const [displayName, setDisplayName] = useState('')
@@ -212,7 +211,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
         .getPublicUrl(fileName)
 
       setAvatarUrl(publicUrl)
-      console.log('Avatar uploaded successfully:', publicUrl)
+      
     } catch (error) {
       console.error('Error uploading avatar:', error)
       alert('画像のアップロードに失敗しました')
@@ -235,7 +234,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
       if (error) throw error
 
       setAvatarUrl('')
-      console.log('Avatar deleted successfully')
+      
     } catch (error) {
       console.error('Error deleting avatar:', error)
       alert('画像の削除に失敗しました')

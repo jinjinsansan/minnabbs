@@ -92,7 +92,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
     if (profile?.is_admin) {
       fetchUsers()
       fetchPosts()
-      calculateStats()
     }
   }, [profile]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -105,6 +104,38 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
 
       if (error) throw error
       setUsers(data || [])
+      // 統計情報を更新
+      if (data) {
+        const now = new Date()
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
+        const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
+
+        const todayPosts = posts.filter(post => 
+          post.created_at && new Date(post.created_at) >= today
+        ).length
+
+        const thisWeekPosts = posts.filter(post => 
+          post.created_at && new Date(post.created_at) >= weekAgo
+        ).length
+
+        const thisMonthPosts = posts.filter(post => 
+          post.created_at && new Date(post.created_at) >= monthAgo
+        ).length
+
+        const activeUsers = data.filter(user => !user.is_blocked).length
+        const blockedUsers = data.filter(user => user.is_blocked).length
+
+        setStats({
+          totalUsers: data.length,
+          totalPosts: posts.length,
+          activeUsers,
+          blockedUsers,
+          todayPosts,
+          thisWeekPosts,
+          thisMonthPosts
+        })
+      }
     } catch (error) {
       console.error('Error fetching users:', error)
     }
@@ -120,43 +151,43 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
 
       if (error) throw error
       setPosts(data || [])
+      // 統計情報を更新
+      if (data) {
+        const now = new Date()
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
+        const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
+
+        const todayPosts = data.filter(post => 
+          post.created_at && new Date(post.created_at) >= today
+        ).length
+
+        const thisWeekPosts = data.filter(post => 
+          post.created_at && new Date(post.created_at) >= weekAgo
+        ).length
+
+        const thisMonthPosts = data.filter(post => 
+          post.created_at && new Date(post.created_at) >= monthAgo
+        ).length
+
+        const activeUsers = users.filter(user => !user.is_blocked).length
+        const blockedUsers = users.filter(user => user.is_blocked).length
+
+        setStats({
+          totalUsers: users.length,
+          totalPosts: data.length,
+          activeUsers,
+          blockedUsers,
+          todayPosts,
+          thisWeekPosts,
+          thisMonthPosts
+        })
+      }
     } catch (error) {
       console.error('Error fetching posts:', error)
     } finally {
       setLoading(false)
     }
-  }
-
-  const calculateStats = () => {
-    const now = new Date()
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
-    const monthAgo = new Date(today.getFullYear(), now.getMonth() - 1, now.getDate())
-
-    const todayPosts = posts.filter(post => 
-      post.created_at && new Date(post.created_at) >= today
-    ).length
-
-    const thisWeekPosts = posts.filter(post => 
-      post.created_at && new Date(post.created_at) >= weekAgo
-    ).length
-
-    const thisMonthPosts = posts.filter(post => 
-      post.created_at && new Date(post.created_at) >= monthAgo
-    ).length
-
-    const activeUsers = users.filter(user => !user.is_blocked).length
-    const blockedUsers = users.filter(user => user.is_blocked).length
-
-    setStats({
-      totalUsers: users.length,
-      totalPosts: posts.length,
-      activeUsers,
-      blockedUsers,
-      todayPosts,
-      thisWeekPosts,
-      thisMonthPosts
-    })
   }
 
   const handleBlockUser = async (userId: string, isBlocked: boolean) => {
@@ -168,7 +199,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
 
       if (error) throw error
       await fetchUsers()
-      calculateStats()
     } catch (error) {
       console.error('Error updating user:', error)
     }
@@ -185,7 +215,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
 
       if (error) throw error
       await fetchPosts()
-      calculateStats()
     } catch (error) {
       console.error('Error deleting post:', error)
     }
@@ -211,7 +240,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
       setNewThreadContent('')
       setNewThreadTitle('')
       await fetchPosts()
-      calculateStats()
       setActiveTab('posts')
     } catch (error) {
       console.error('Error creating thread:', error)

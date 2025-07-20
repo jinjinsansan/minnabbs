@@ -158,7 +158,7 @@ const BoardPage: React.FC = () => {
 
   const fetchDiaries = async () => {
     try {
-      console.log('fetchDiaries started')
+  
       setRefreshing(true)
       const { data, error } = await supabase
         .from('diary')
@@ -166,7 +166,7 @@ const BoardPage: React.FC = () => {
         .eq('is_public', true)
         .order('created_at', { ascending: false })
 
-      console.log('fetchDiaries result:', { data, error })
+      
 
       if (error) throw error
       
@@ -187,13 +187,13 @@ const BoardPage: React.FC = () => {
       setHasMore(filteredData.length > ITEMS_PER_PAGE)
       setCurrentPage(0)
       
-      console.log('Diaries set successfully')
+      
     } catch (error) {
       console.error('Error fetching diaries:', error)
     } finally {
       setLoading(false)
       setRefreshing(false)
-      console.log('Loading states reset')
+      
     }
   }
 
@@ -369,10 +369,16 @@ const BoardPage: React.FC = () => {
 
       if (error) throw error
 
-      // 新しい投稿をリストの先頭に追加
-      setDiaries(prev => [data, ...prev])
-      setFilteredDiaries(prev => [data, ...prev])
-      setDisplayedDiaries(prev => [data, ...prev.slice(0, ITEMS_PER_PAGE - 1)])
+      // 新しい投稿をリストの先頭に追加（一括更新でパフォーマンス向上）
+      const newDiary = data
+      setDiaries(prev => [newDiary, ...prev])
+      setFilteredDiaries(prev => [newDiary, ...prev])
+      
+      // displayedDiariesの更新を最適化
+      setDisplayedDiaries(prev => {
+        const newDisplayed = [newDiary, ...prev.slice(0, ITEMS_PER_PAGE - 1)]
+        return newDisplayed
+      })
     } catch (error) {
       console.error('Error creating post:', error)
       alert('投稿に失敗しました')
@@ -383,11 +389,11 @@ const BoardPage: React.FC = () => {
     fetchDiaries()
   }
 
-  console.log('App render - authLoading:', authLoading, 'loading:', loading, 'user:', user, 'profile:', profile)
+
 
   // 認証がまだ初期化中の場合はローディング表示
   if (authLoading) {
-    console.log('Showing auth loading spinner')
+    
     return (
       <div className="app-container">
         <div className="app-content">
@@ -404,13 +410,12 @@ const BoardPage: React.FC = () => {
 
   // データ取得中の場合はローディング表示（ただし認証は完了している）
   if (loading) {
-    console.log('Showing data loading spinner')
+    
     return (
       <div className="app-container">
         <div className="app-content">
           <Header 
             onAdminClick={() => {
-              console.log('Admin button clicked')
               if (profile?.is_admin) {
                 setShowAdminPanel(true)
               } else {
@@ -418,7 +423,6 @@ const BoardPage: React.FC = () => {
               }
             }}
             onProfileClick={() => {
-              console.log('Profile button clicked, showProfilePage:', showProfilePage)
               setShowProfilePage(true)
             }}
           />
@@ -437,7 +441,6 @@ const BoardPage: React.FC = () => {
       <div className="app-content">
         <Header 
           onAdminClick={() => {
-            console.log('Admin button clicked')
             if (profile?.is_admin) {
               setShowAdminPanel(true)
             } else {
@@ -445,7 +448,6 @@ const BoardPage: React.FC = () => {
             }
           }}
           onProfileClick={() => {
-            console.log('Profile button clicked, showProfilePage:', showProfilePage)
             setShowProfilePage(true)
           }}
         />
@@ -461,7 +463,7 @@ const BoardPage: React.FC = () => {
                     <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
                       <span className="text-white text-sm sm:text-lg">📖</span>
                     </div>
-                    <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">みんなにっき</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">みんなのにっき</h2>
                   </div>
                   
                   <div className="flex items-center space-x-2 sm:space-x-3">
@@ -585,7 +587,7 @@ const BoardPage: React.FC = () => {
       {showAdminLogin && (
         <AdminLogin 
           onLogin={(isAdmin) => {
-            console.log('AdminLogin onLogin called with isAdmin:', isAdmin)
+            console.log('Admin login callback received:', isAdmin)
             if (isAdmin) {
               console.log('Setting showAdminLogin to false and showAdminPanel to true')
               setShowAdminLogin(false)
@@ -605,7 +607,6 @@ const BoardPage: React.FC = () => {
       {showProfilePage && (
         <ProfilePage 
           onClose={() => {
-            console.log('Profile page closing')
             setShowProfilePage(false)
           }}
           onNewPost={handleNewPost}
