@@ -65,12 +65,20 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
   const [likeCount, setLikeCount] = useState(0)
   const [commentCount, setCommentCount] = useState(0)
   const [userProfile, setUserProfile] = useState<{ display_name: string | null } | null>(null)
-  const { user } = useAuth()
+  const { user, profile, isAdminMode } = useAuth()
   const colors = getEmotionColorClasses(diary.emotion) // 感情に応じた色を取得
 
+  // 管理者状態のデバッグ情報
+  console.log('DiaryCard admin state:', {
+    isAdmin,
+    profileIsAdmin: profile?.is_admin,
+    userId: user?.id,
+    diaryId: diary.id
+  })
+
   const isOwner = currentUserId === diary.user_id
-  const canEdit = isOwner || isAdmin
-  const canDelete = isOwner || isAdmin
+  const canEdit = isOwner || isAdmin || isAdminMode || profile?.is_admin
+  const canDelete = isOwner || isAdmin || isAdminMode || profile?.is_admin
 
   // ユーザープロフィールを取得
   useEffect(() => {
@@ -414,7 +422,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
               <CommentSection 
                 diaryId={diary.id} 
                 diaryUserId={diary.user_id || undefined}
-                isAdmin={isAdmin}
+                isAdmin={isAdmin || profile?.is_admin || false}
                 onUserClick={onUserClick}
               />
             </div>

@@ -147,7 +147,7 @@ const BoardPage: React.FC = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [currentPage, setCurrentPage] = useState(0)
   const ITEMS_PER_PAGE = 30
-  const { user, profile, loading: authLoading } = useAuth()
+  const { user, profile, isAdminMode, loading: authLoading } = useAuth()
   const { blockedUsers } = useBlock()
 
   useEffect(() => {
@@ -467,14 +467,25 @@ const BoardPage: React.FC = () => {
                   </div>
                   
                   <div className="flex items-center space-x-2 sm:space-x-3">
-                    {/* 管理者ログインボタン（通常ユーザーがログイン済みの場合のみ表示） */}
-                    {user && !profile?.is_admin && (
+                    {/* 管理者ログインボタン（管理者でない場合に表示） */}
+                    {!isAdminMode && !profile?.is_admin && (
                       <button
                         onClick={() => setShowAdminLogin(true)}
                         className="flex items-center space-x-2 px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 border-2 border-orange-300"
                       >
                         <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
                         <span>管理者</span>
+                      </button>
+                    )}
+                    
+                    {/* 管理者モード切り替えボタン（管理者の場合に表示） */}
+                    {(isAdminMode || profile?.is_admin) && (
+                      <button
+                        onClick={() => setShowAdminPanel(true)}
+                        className="flex items-center space-x-2 px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 border-2 border-purple-300"
+                      >
+                        <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span>管理画面</span>
                       </button>
                     )}
                     
@@ -507,7 +518,7 @@ const BoardPage: React.FC = () => {
                           key={diary.id}
                           diary={diary}
                           currentUserId={user?.id}
-                          isAdmin={profile?.is_admin || false}
+                          isAdmin={isAdminMode || profile?.is_admin || false}
                           onDelete={handleDeleteDiary}
                           onUpdate={handleUpdateDiary}
                           onUserClick={(userId) => {
@@ -591,7 +602,10 @@ const BoardPage: React.FC = () => {
             if (isAdmin) {
               console.log('Setting showAdminLogin to false and showAdminPanel to true')
               setShowAdminLogin(false)
-              setShowAdminPanel(true)
+              // 少し遅延を入れて状態更新を確実にする
+              setTimeout(() => {
+                setShowAdminPanel(true)
+              }, 100)
             }
           }}
           onClose={() => setShowAdminLogin(false)}

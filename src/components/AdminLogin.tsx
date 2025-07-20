@@ -34,17 +34,24 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onClose }) => {
         console.log('Admin credentials verified')
 
         // ログイン成功
-        loginAsAdmin()
+        await loginAsAdmin()
         
         console.log('Calling onLogin(true)')
         onLogin(true)
+        
+        // 成功メッセージを表示
+        console.log('Admin login successful')
       } else {
         console.log('Invalid credentials')
         setError('メールアドレスまたはパスワードが正しくありません')
       }
     } catch (error) {
       console.error('Admin login error:', error)
-      setError('ログインに失敗しました')
+      if (error instanceof Error) {
+        setError(error.message)
+      } else {
+        setError('ログインに失敗しました。管理者アカウントが正しく設定されているか確認してください。')
+      }
     } finally {
       setIsLoading(false)
     }

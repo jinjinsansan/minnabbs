@@ -338,6 +338,7 @@ export const useAuth = () => {
     profile,
     session,
     loading,
+    isAdminMode,
     updateProfile,
     loginAsAdmin,
     logout,

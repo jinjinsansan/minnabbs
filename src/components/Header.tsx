@@ -26,7 +26,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
-  const { user, profile, signInWithGoogle, signOut } = useAuth()
+  const { user, profile, isAdminMode, signInWithGoogle, signOut } = useAuth()
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [isSigningIn, setIsSigningIn] = useState(false)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
@@ -109,7 +109,7 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
                       <span className="text-sm font-semibold bg-gradient-to-r from-gray-800 to-purple-800 bg-clip-text text-transparent">
                         {profile?.display_name || '匿名'}
                       </span>
-                      {profile?.is_admin && (
+                      {(isAdminMode || profile?.is_admin) && (
                         <Shield className="w-3 h-3 text-yellow-500" />
                       )}
                     </div>
@@ -117,13 +117,13 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
                 </button>
                 
                 {/* 管理者ボタン */}
-                {profile?.is_admin && (
+                {(isAdminMode || profile?.is_admin) && (
                   <button
                     onClick={onAdminClick}
                     className="flex items-center space-x-2 px-3 py-2 text-purple-600 hover:text-purple-800 hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 border border-purple-200/30"
                   >
                     <Settings className="w-4 h-4" />
-                    <span className="text-sm font-medium">管理</span>
+                    <span className="text-sm font-medium">管理画面</span>
                   </button>
                 )}
                 
@@ -212,7 +212,7 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
                         <span className="text-sm font-medium text-gray-900">
                           {profile?.display_name || '匿名'}
                         </span>
-                        {profile?.is_admin && (
+                        {(isAdminMode || profile?.is_admin) && (
                           <Shield className="w-4 h-4 text-yellow-500" />
                         )}
                       </div>

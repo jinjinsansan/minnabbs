@@ -39,8 +39,18 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isAnonymous, setIsAnonymous] = useState(false)
   const [userProfiles, setUserProfiles] = useState<Record<string, { display_name: string | null }>>({})
-  const { user, profile } = useAuth()
+  const { user, profile, isAdminMode } = useAuth()
   const { blockedUsers } = useBlock()
+
+  // 管理者状態のデバッグ情報
+  const effectiveIsAdmin = isAdmin || isAdminMode || profile?.is_admin || false
+  console.log('CommentSection admin state:', {
+    isAdmin,
+    userProfile: profile,
+    userIsAdmin: profile?.is_admin,
+    effectiveIsAdmin,
+    userId: user?.id
+  })
 
   const fetchComments = useCallback(async () => {
     try {
@@ -155,7 +165,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
   const handleDeleteComment = async (commentId: string) => {
     if (!user) return
 
-    if (!window.confirm('このコメントを削除しますか？')) return
+    const confirmMessage = effectiveIsAdmin 
+      ? '管理者としてこのコメントを削除しますか？' 
+      : 'このコメントを削除しますか？'
+    
+    if (!window.confirm(confirmMessage)) return
 
     try {
       const { error } = await supabase
@@ -164,7 +178,13 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
         .eq('id', commentId)
 
       if (error) throw error
+      
+      console.log('Comment deleted successfully:', commentId)
       await fetchComments()
+      
+      if (effectiveIsAdmin) {
+        console.log('Admin deleted comment:', commentId)
+      }
     } catch (error) {
       console.error('Error deleting comment:', error)
       alert('コメントの削除に失敗しました')
@@ -174,10 +194,27 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
   // コメント削除権限をチェック
   const canDeleteComment = (comment: Comment) => {
     if (!user) return false
+    
+    const isCommentOwner = comment.user_id === user.id
+    const isDiaryOwner = diaryUserId === user.id
+    const hasAdminRights = effectiveIsAdmin
+    
+    console.log('Comment delete permission check:', {
+      commentId: comment.id,
+      commentUserId: comment.user_id,
+      currentUserId: user.id,
+      diaryUserId,
+      isAdmin,
+      isCommentOwner,
+      isDiaryOwner,
+      hasAdminRights,
+      canDelete: isCommentOwner || isDiaryOwner || hasAdminRights
+    })
+    
     return (
-      comment.user_id === user.id || // コメント投稿者本人
-      diaryUserId === user.id || // 日記投稿者
-      isAdmin // 管理者
+      isCommentOwner || // コメント投稿者本人
+      isDiaryOwner || // 日記投稿者
+      hasAdminRights // 管理者
     )
   }
 
@@ -196,7 +233,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
           </div>
         )}
         {filteredComments.map((comment) => (
-          <div key={comment.id} className="flex space-x-3 p-2 sm:p-3 rounded-2xl bg-gradient-to-br from-white/50 to-purple-50/30 backdrop-blur-sm border border-purple-200/30 hover:shadow-md transition-all duration-200 w-full" data-heart-color={getRandomHeartColor()}>
+          <div key={comment.id} className={`flex space-x-3 p-2 sm:p-3 rounded-2xl backdrop-blur-sm border hover:shadow-md transition-all duration-200 w-full ${
+            effectiveIsAdmin && canDeleteComment(comment) 
+              ? 'bg-gradient-to-br from-red-50/50 to-pink-50/30 border-red-200/30' 
+              : 'bg-gradient-to-br from-white/50 to-purple-50/30 border-purple-200/30'
+          }`} data-heart-color={getRandomHeartColor()}>
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-white to-purple-50 border-2 border-purple-200/50 flex items-center justify-center flex-shrink-0 shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-110">
               <ElegantHeart className={getRandomHeartColor()} size="sm" />
             </div>
@@ -220,8 +261,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
                 {canDeleteComment(comment) && (
                   <button
                     onClick={() => handleDeleteComment(comment.id)}
-                    className="p-1.5 rounded-lg hover:bg-red-50 hover:text-red-600 transition-all duration-200 text-gray-400 hover:shadow-sm flex-shrink-0"
-                    title="コメントを削除"
+                    className={`p-1.5 rounded-lg transition-all duration-200 hover:shadow-sm flex-shrink-0 ${
+                      effectiveIsAdmin 
+                        ? 'text-red-500 hover:bg-red-50 hover:text-red-600' 
+                        : 'text-gray-400 hover:bg-red-50 hover:text-red-600'
+                    }`}
+                    title={effectiveIsAdmin ? "管理者として削除" : "コメントを削除"}
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>

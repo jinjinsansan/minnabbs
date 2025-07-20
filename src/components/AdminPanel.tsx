@@ -21,14 +21,12 @@ import {
   TrendingUp,
   UserCheck,
   UserX,
-  Zap,
-  Lock,
-  Bell,
-  Palette
+  Zap
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { Database } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { useSystemSettings } from '../hooks/useSystemSettings'
 import { formatDistanceToNow } from 'date-fns'
 import { ja } from 'date-fns/locale'
 import ElegantHeart from './ElegantHeart'
@@ -86,12 +84,50 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
     thisWeekPosts: 0,
     thisMonthPosts: 0
   })
-  const { profile } = useAuth()
+  const { profile, isAdminMode } = useAuth()
+  const { settings, updateSetting } = useSystemSettings()
+
+  // 統計情報を更新する関数
+  const updateStats = (userData: Profile[], postData: DiaryEntry[]) => {
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
+    const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
+
+    const todayPosts = postData.filter(post => 
+      post.created_at && new Date(post.created_at) >= today
+    ).length
+
+    const thisWeekPosts = postData.filter(post => 
+      post.created_at && new Date(post.created_at) >= weekAgo
+    ).length
+
+    const thisMonthPosts = postData.filter(post => 
+      post.created_at && new Date(post.created_at) >= monthAgo
+    ).length
+
+    const activeUsers = userData.filter(user => !user.is_blocked).length
+    const blockedUsers = userData.filter(user => user.is_blocked).length
+
+    setStats({
+      totalUsers: userData.length,
+      totalPosts: postData.length,
+      activeUsers,
+      blockedUsers,
+      todayPosts,
+      thisWeekPosts,
+      thisMonthPosts
+    })
+  }
 
   useEffect(() => {
     if (profile?.is_admin) {
-      fetchUsers()
-      fetchPosts()
+      // データを順次読み込んで統計を更新
+      const loadData = async () => {
+        await fetchUsers()
+        await fetchPosts()
+      }
+      loadData()
     }
   }, [profile]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -104,37 +140,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
 
       if (error) throw error
       setUsers(data || [])
-      // 統計情報を更新
-      if (data) {
-        const now = new Date()
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
-        const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
-
-        const todayPosts = posts.filter(post => 
-          post.created_at && new Date(post.created_at) >= today
-        ).length
-
-        const thisWeekPosts = posts.filter(post => 
-          post.created_at && new Date(post.created_at) >= weekAgo
-        ).length
-
-        const thisMonthPosts = posts.filter(post => 
-          post.created_at && new Date(post.created_at) >= monthAgo
-        ).length
-
-        const activeUsers = data.filter(user => !user.is_blocked).length
-        const blockedUsers = data.filter(user => user.is_blocked).length
-
-        setStats({
-          totalUsers: data.length,
-          totalPosts: posts.length,
-          activeUsers,
-          blockedUsers,
-          todayPosts,
-          thisWeekPosts,
-          thisMonthPosts
-        })
+      // 統計情報を更新（postsが読み込まれた後に実行）
+      if (data && posts.length > 0) {
+        updateStats(data, posts)
       }
     } catch (error) {
       console.error('Error fetching users:', error)
@@ -151,37 +159,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
 
       if (error) throw error
       setPosts(data || [])
-      // 統計情報を更新
-      if (data) {
-        const now = new Date()
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
-        const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
-
-        const todayPosts = data.filter(post => 
-          post.created_at && new Date(post.created_at) >= today
-        ).length
-
-        const thisWeekPosts = data.filter(post => 
-          post.created_at && new Date(post.created_at) >= weekAgo
-        ).length
-
-        const thisMonthPosts = data.filter(post => 
-          post.created_at && new Date(post.created_at) >= monthAgo
-        ).length
-
-        const activeUsers = users.filter(user => !user.is_blocked).length
-        const blockedUsers = users.filter(user => user.is_blocked).length
-
-        setStats({
-          totalUsers: users.length,
-          totalPosts: data.length,
-          activeUsers,
-          blockedUsers,
-          todayPosts,
-          thisWeekPosts,
-          thisMonthPosts
-        })
+      // 統計情報を更新（usersが読み込まれた後に実行）
+      if (data && users.length > 0) {
+        updateStats(users, data)
       }
     } catch (error) {
       console.error('Error fetching posts:', error)
@@ -246,6 +226,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
     }
   }
 
+  // システム設定のトグル処理
+  const handleToggleSetting = async (key: 'allow_new_registration' | 'allow_anonymous_posts') => {
+    const newValue = !settings[key]
+    const success = await updateSetting(key, newValue)
+    
+    if (success) {
+      // 成功時のフィードバック（オプション）
+      console.log(`${key} を ${newValue ? 'ON' : 'OFF'} に設定しました`)
+    }
+  }
+
   const filteredUsers = users.filter(user =>
     user.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -256,7 +247,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
     post.nickname?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  if (!profile?.is_admin) {
+  if (!isAdminMode && !profile?.is_admin) {
     return (
       <div className="modal-overlay">
         <div className="bg-gradient-to-br from-white/95 to-purple-50/95 backdrop-blur-md rounded-3xl border-2 border-purple-200/50 max-w-md w-full shadow-2xl">
@@ -298,13 +289,25 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
                   システム管理とユーザー管理
                 </p>
               </div>
-          </div>
-          <button
-            onClick={onClose}
-              className="p-3 hover:bg-white/20 rounded-2xl transition-all duration-200 backdrop-blur-sm"
-          >
-              <X className="w-6 h-6 text-white" />
-          </button>
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => {
+                  onClose()
+                  // 管理者モードを維持したままボードページに戻る
+                  window.location.href = '/'
+                }}
+                className="flex items-center space-x-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-2xl transition-all duration-200 backdrop-blur-sm text-sm font-medium"
+              >
+                <span>掲示板に戻る</span>
+              </button>
+              <button
+                onClick={onClose}
+                className="p-3 hover:bg-white/20 rounded-2xl transition-all duration-200 backdrop-blur-sm"
+              >
+                <X className="w-6 h-6 text-white" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -664,116 +667,37 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
           {/* Settings Tab */}
           {activeTab === 'settings' && (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* General Settings */}
-                <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border-2 border-purple-200/50 shadow-lg">
-                  <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center space-x-2">
-                    <Settings className="w-5 h-5 text-purple-600" />
-                    <span>一般設定</span>
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                      <span className="text-gray-700 font-medium">メンテナンスモード</span>
-                      <button className="w-12 h-6 bg-gray-300 rounded-full relative">
-                        <div className="w-5 h-5 bg-white rounded-full absolute left-0.5 top-0.5 transition-all duration-200"></div>
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                      <span className="text-gray-700 font-medium">新規ユーザー登録</span>
-                      <button className="w-12 h-6 bg-green-500 rounded-full relative">
-                        <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5 transition-all duration-200"></div>
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                      <span className="text-gray-700 font-medium">匿名投稿</span>
-                      <button className="w-12 h-6 bg-green-500 rounded-full relative">
-                        <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5 transition-all duration-200"></div>
-                      </button>
-                    </div>
+              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border-2 border-purple-200/50 shadow-lg">
+                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center space-x-2">
+                  <Settings className="w-5 h-5 text-purple-600" />
+                  <span>システム設定</span>
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                    <span className="text-gray-700 font-medium">新規ユーザー登録</span>
+                    <button 
+                      onClick={() => handleToggleSetting('allow_new_registration')}
+                      className={`w-12 h-6 rounded-full relative transition-all duration-200 ${
+                        settings.allow_new_registration ? 'bg-green-500' : 'bg-gray-300'
+                      }`}
+                    >
+                      <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all duration-200 ${
+                        settings.allow_new_registration ? 'right-0.5' : 'left-0.5'
+                      }`}></div>
+                    </button>
                   </div>
-                </div>
-
-                {/* Security Settings */}
-                <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border-2 border-purple-200/50 shadow-lg">
-                  <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center space-x-2">
-                    <Lock className="w-5 h-5 text-purple-600" />
-                    <span>セキュリティ設定</span>
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                      <span className="text-gray-700 font-medium">2段階認証</span>
-                      <button className="w-12 h-6 bg-gray-300 rounded-full relative">
-                        <div className="w-5 h-5 bg-white rounded-full absolute left-0.5 top-0.5 transition-all duration-200"></div>
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                      <span className="text-gray-700 font-medium">IP制限</span>
-                      <button className="w-12 h-6 bg-gray-300 rounded-full relative">
-                        <div className="w-5 h-5 bg-white rounded-full absolute left-0.5 top-0.5 transition-all duration-200"></div>
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                      <span className="text-gray-700 font-medium">セッション管理</span>
-                      <button className="w-12 h-6 bg-green-500 rounded-full relative">
-                        <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5 transition-all duration-200"></div>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Notification Settings */}
-                <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border-2 border-purple-200/50 shadow-lg">
-                  <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center space-x-2">
-                    <Bell className="w-5 h-5 text-purple-600" />
-                    <span>通知設定</span>
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                      <span className="text-gray-700 font-medium">新規ユーザー通知</span>
-                      <button className="w-12 h-6 bg-green-500 rounded-full relative">
-                        <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5 transition-all duration-200"></div>
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                      <span className="text-gray-700 font-medium">不適切投稿通知</span>
-                      <button className="w-12 h-6 bg-green-500 rounded-full relative">
-                        <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5 transition-all duration-200"></div>
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                      <span className="text-gray-700 font-medium">システム通知</span>
-                      <button className="w-12 h-6 bg-green-500 rounded-full relative">
-                        <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5 transition-all duration-200"></div>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Appearance Settings */}
-                <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border-2 border-purple-200/50 shadow-lg">
-                  <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center space-x-2">
-                    <Palette className="w-5 h-5 text-purple-600" />
-                    <span>外観設定</span>
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                      <span className="text-gray-700 font-medium">ダークモード</span>
-                      <button className="w-12 h-6 bg-gray-300 rounded-full relative">
-                        <div className="w-5 h-5 bg-white rounded-full absolute left-0.5 top-0.5 transition-all duration-200"></div>
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                      <span className="text-gray-700 font-medium">アニメーション</span>
-                      <button className="w-12 h-6 bg-green-500 rounded-full relative">
-                        <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5 transition-all duration-200"></div>
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                      <span className="text-gray-700 font-medium">レスポンシブ</span>
-                      <button className="w-12 h-6 bg-green-500 rounded-full relative">
-                        <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5 transition-all duration-200"></div>
-                      </button>
-                    </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                    <span className="text-gray-700 font-medium">匿名投稿</span>
+                    <button 
+                      onClick={() => handleToggleSetting('allow_anonymous_posts')}
+                      className={`w-12 h-6 rounded-full relative transition-all duration-200 ${
+                        settings.allow_anonymous_posts ? 'bg-green-500' : 'bg-gray-300'
+                      }`}
+                    >
+                      <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all duration-200 ${
+                        settings.allow_anonymous_posts ? 'right-0.5' : 'left-0.5'
+                      }`}></div>
+                    </button>
                   </div>
                 </div>
               </div>
