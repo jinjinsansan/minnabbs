@@ -91,6 +91,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
     isAdmin,
     isAdminMode,
     profileIsAdmin: profile?.is_admin,
+    canEdit,
     canDelete
   })
 
@@ -401,6 +402,8 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
 
             {canEdit && (
               <div className="relative">
+                {/* デバッグ: メニューボタンが表示される */}
+                {(() => { console.log('Menu button should be visible for diary:', diary.id, 'canEdit:', canEdit); return null; })()}
                 <button 
                   onClick={() => setShowMenu(!showMenu)}
                   className="p-2.5 rounded-xl hover:bg-white/70 transition-all duration-200 text-gray-600 hover:text-gray-700 shadow-sm hover:shadow-md transform hover:scale-105"
