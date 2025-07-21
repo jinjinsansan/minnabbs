@@ -4,6 +4,7 @@ import { formatDate } from '../utils/dateUtils'
 import ElegantHeart from './ElegantHeart'
 import { supabase, Database } from '../lib/supabase'
 import { useBlock } from '../hooks/useBlock'
+import { useSystemSettings } from '../hooks/useSystemSettings'
 
 type DiaryEntry = Database['public']['Tables']['diary']['Row']
 
@@ -11,7 +12,7 @@ interface ProfilePageProps {
   onClose: () => void
   onNewPost?: (post: Omit<DiaryEntry, 'id' | 'created_at'>) => void
   user: { id: string; email?: string } | null
-  profile: { display_name?: string; avatar_url?: string; email?: string; created_at?: string; is_admin?: boolean } | null
+  profile: { display_name?: string; avatar_url?: string; email?: string; created_at?: string; is_admin?: boolean; is_blocked?: boolean } | null
 }
 
 const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, profile }) => {
@@ -45,6 +46,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
     email: string | null
     created_at: string
   }>>([])
+
+  // システム設定
+  const { settings, loading: settingsLoading } = useSystemSettings()
 
   // ブロックしたユーザーのプロフィール情報を取得
   useEffect(() => {
@@ -110,6 +114,18 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
     e.preventDefault()
     if (!diaryContent.trim() || isSubmitting) return
 
+    // システム設定をチェック
+    if (!settings.allow_anonymous_posts && isAnonymous) {
+      alert('現在、匿名投稿は許可されていません')
+      return
+    }
+
+    // ユーザーがブロックされているかチェック
+    if (profile?.is_blocked) {
+      alert('アカウントがブロックされているため、投稿できません')
+      return
+    }
+
     setIsSubmitting(true)
     try {
       const postData = {
@@ -121,7 +137,17 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
         created_at: selectedDate.toISOString()
       }
 
-      if (onNewPost) {
+      // 直接データベースに挿入
+      const { data, error } = await supabase
+        .from('diary')
+        .insert([postData])
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // 成功した場合のみコールバックを呼び出し
+      if (onNewPost && data) {
         onNewPost(postData)
       }
       

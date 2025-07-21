@@ -8,6 +8,7 @@ export interface Profile {
   display_name: string | null
   avatar_url: string | null
   is_admin: boolean | null
+  is_blocked?: boolean | null
   created_at: string
 }
 
@@ -72,6 +73,7 @@ export const useAuth = () => {
         display_name: user.user_metadata?.full_name || user.email?.split('@')[0] || '匿名',
         avatar_url: user.user_metadata?.avatar_url || null,
         is_admin: user.email === 'jin@namisapo.com',
+        is_blocked: false,
       }
 
 
@@ -91,6 +93,7 @@ export const useAuth = () => {
           display_name: user.user_metadata?.full_name || user.email?.split('@')[0] || '匿名',
           avatar_url: user.user_metadata?.avatar_url || null,
           is_admin: user.email === 'jin@namisapo.com',
+          is_blocked: false,
           created_at: new Date().toISOString()
         }
       }
@@ -133,6 +136,7 @@ export const useAuth = () => {
               display_name: '管理者',
               avatar_url: null,
               is_admin: true,
+              is_blocked: false,
               created_at: new Date().toISOString()
             }
             setProfile(adminProfile)
@@ -151,6 +155,7 @@ export const useAuth = () => {
             display_name: '管理者',
             avatar_url: null,
             is_admin: true,
+            is_blocked: false,
             created_at: new Date().toISOString()
           }
           setProfile(adminProfile)
@@ -207,6 +212,7 @@ export const useAuth = () => {
               display_name: '管理者',
               avatar_url: null,
               is_admin: true,
+              is_blocked: false,
               created_at: new Date().toISOString()
             }
             setProfile(adminProfile)
@@ -227,6 +233,7 @@ export const useAuth = () => {
               display_name: '管理者',
               avatar_url: null,
               is_admin: true,
+              is_blocked: false,
               created_at: new Date().toISOString()
             }
             setProfile(adminProfile)
@@ -262,6 +269,7 @@ export const useAuth = () => {
       display_name: '管理者',
       avatar_url: null,
       is_admin: true,
+      is_blocked: false,
       created_at: new Date().toISOString()
     }
     

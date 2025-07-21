@@ -3,6 +3,7 @@ import { Send, Trash2 } from 'lucide-react'
 import { supabase, Database } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useBlock } from '../hooks/useBlock'
+import { useSystemSettings } from '../hooks/useSystemSettings'
 import { formatDistanceToNow } from 'date-fns'
 import { ja } from 'date-fns/locale'
 import ElegantHeart from './ElegantHeart'
@@ -41,6 +42,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
   const [userProfiles, setUserProfiles] = useState<Record<string, { display_name: string | null }>>({})
   const { user, profile, isAdminMode } = useAuth()
   const { blockedUsers } = useBlock()
+  const { settings } = useSystemSettings()
 
   // 管理者状態のデバッグ情報
   const effectiveIsAdmin = isAdmin || isAdminMode || profile?.is_admin || false
@@ -137,6 +139,18 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newComment.trim() || !user || isSubmitting) return
+
+    // システム設定をチェック
+    if (!settings.allow_anonymous_posts && isAnonymous) {
+      alert('現在、匿名投稿は許可されていません')
+      return
+    }
+
+    // ユーザーがブロックされているかチェック
+    if (profile?.is_blocked) {
+      alert('アカウントがブロックされているため、コメントできません')
+      return
+    }
 
     setIsSubmitting(true)
     try {
