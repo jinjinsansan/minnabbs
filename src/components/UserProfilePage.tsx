@@ -260,13 +260,14 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ userId, onClose }) =>
 
                 {/* Profile Info */}
                 <div className="space-y-3">
-                  {profile.email && (
+                  {/* メールアドレスは個人情報のため非表示 */}
+                  {/* {profile.email && (
                     <div className="flex items-center space-x-3 text-sm">
                       <Mail className="w-4 h-4 text-purple-500" />
                       <span className="text-gray-600">メール:</span>
                       <span className="text-gray-800 font-medium">{profile.email}</span>
                     </div>
-                  )}
+                  )} */}
                   
                   {profile.website && (
                     <div className="flex items-center space-x-3 text-sm">
