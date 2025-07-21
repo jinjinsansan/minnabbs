@@ -258,7 +258,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
     
     // const _diaryUrl = `${window.location.origin}/diary/${diary.id}`
     const shareText = `${getDisplayName()}さんの日記\n\n${diary.content?.substring(0, 50)}${diary.content && diary.content.length > 50 ? '...' : ''}\n\n#かんじょうにっき仲間で繋がりたい\n#かんじょうにっき #感情日記 #自己肯定感 #みんなのにっき`
-    const shareUrl = 'https://namisapo.vercel.app/'
+    const shareUrl = 'https://dairynamisapo.vercel.app/'
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`
     
     window.open(twitterUrl, '_blank', 'width=550,height=420')
