@@ -80,6 +80,18 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
   const canEdit = isOwner || isAdmin || isAdminMode || profile?.is_admin
   const canDelete = isOwner || isAdmin || isAdminMode || profile?.is_admin
 
+  // 削除権限のデバッグ情報
+  console.log('DiaryCard delete permission check:', {
+    diaryId: diary.id,
+    diaryUserId: diary.user_id,
+    currentUserId,
+    isOwner,
+    isAdmin,
+    isAdminMode,
+    profileIsAdmin: profile?.is_admin,
+    canDelete
+  })
+
   // ユーザープロフィールを取得
   useEffect(() => {
     const fetchUserProfile = async () => {
