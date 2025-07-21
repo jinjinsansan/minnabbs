@@ -266,10 +266,20 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
                   </button>
                   <span className="text-gray-400 hidden sm:inline">·</span>
                   <span className="text-gray-500/70 text-xs font-medium">
-                    {formatDistanceToNow(new Date(comment.created_at), { 
-                      addSuffix: true, 
-                      locale: ja 
-                    })}
+                    {(() => {
+                      const createdAt = new Date(comment.created_at)
+                      const now = new Date()
+                      const isFuture = createdAt > now
+                      
+                      if (isFuture) {
+                        return 'たった今'
+                      }
+                      
+                      return formatDistanceToNow(createdAt, { 
+                        addSuffix: true, 
+                        locale: ja 
+                      })
+                    })()}
                   </span>
                 </div>
                 {canDeleteComment(comment) && (

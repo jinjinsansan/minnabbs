@@ -533,10 +533,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
                             </div>
                             <div className="flex items-center space-x-1">
                               <Clock className="w-4 h-4" />
-                              <span>登録: {formatDistanceToNow(new Date(user.created_at), { 
-                          addSuffix: true, 
-                          locale: ja 
-                              })}</span>
+                              <span>登録: {(() => {
+                                const createdAt = new Date(user.created_at)
+                                const now = new Date()
+                                const isFuture = createdAt > now
+                                
+                                if (isFuture) {
+                                  return 'たった今'
+                                }
+                                
+                                return formatDistanceToNow(createdAt, { 
+                                  addSuffix: true, 
+                                  locale: ja 
+                                })
+                              })()}</span>
                             </div>
                           </div>
                     </div>
@@ -634,10 +644,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
                             {post.nickname || '匿名'}
                           </span>
                           <span className="text-gray-500 text-sm">
-                            {post.created_at && formatDistanceToNow(new Date(post.created_at), { 
-                              addSuffix: true, 
-                              locale: ja 
-                            })}
+                            {post.created_at && (() => {
+                              const createdAt = new Date(post.created_at)
+                              const now = new Date()
+                              const isFuture = createdAt > now
+                              
+                              if (isFuture) {
+                                return 'たった今'
+                              }
+                              
+                              return formatDistanceToNow(createdAt, { 
+                                addSuffix: true, 
+                                locale: ja 
+                              })
+                            })()}
                           </span>
                             {post.nickname === '管理者' && (
                               <div className="px-2 py-1 bg-yellow-100 rounded-full">

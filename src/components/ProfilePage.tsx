@@ -134,7 +134,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
         content: diaryContent.trim() + (insights.trim() ? '\n\n【今日の小さな気づき】\n' + insights.trim() : ''),
         emotion: selectedEmotion || null,
         is_public: true,
-        created_at: selectedDate.toISOString()
+        created_at: new Date().toISOString()
       }
 
       // 直接データベースに挿入

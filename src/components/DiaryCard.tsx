@@ -295,10 +295,20 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
             </span>
             <span className="text-gray-400 hidden sm:inline">·</span>
             <span className="text-gray-500/70 text-xs font-medium">
-              {diary.created_at && formatDistanceToNow(new Date(diary.created_at), { 
-                addSuffix: true, 
-                locale: ja 
-              })}
+              {diary.created_at && (() => {
+                const createdAt = new Date(diary.created_at)
+                const now = new Date()
+                const isFuture = createdAt > now
+                
+                if (isFuture) {
+                  return 'たった今'
+                }
+                
+                return formatDistanceToNow(createdAt, { 
+                  addSuffix: true, 
+                  locale: ja 
+                })
+              })()}
             </span>
           </div>
 
