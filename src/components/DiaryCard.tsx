@@ -92,7 +92,8 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
     isAdminMode,
     profileIsAdmin: profile?.is_admin,
     canEdit,
-    canDelete
+    canDelete,
+    onDelete: !!onDelete
   })
 
   // ユーザープロフィールを取得
