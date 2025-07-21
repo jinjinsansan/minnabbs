@@ -76,7 +76,8 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
     diaryId: diary.id
   })
 
-  const isOwner = currentUserId === diary.user_id
+  const isOwner = (currentUserId && diary.user_id && currentUserId === diary.user_id) || 
+                  (user?.id && diary.user_id && user.id === diary.user_id)
   const canEdit = isOwner || isAdmin || isAdminMode || profile?.is_admin
   const canDelete = isOwner || isAdmin || isAdminMode || profile?.is_admin
 
@@ -85,6 +86,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
     diaryId: diary.id,
     diaryUserId: diary.user_id,
     currentUserId,
+    userId: user?.id,
     isOwner,
     isAdmin,
     isAdminMode,
