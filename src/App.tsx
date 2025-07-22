@@ -397,6 +397,7 @@ const BoardPage: React.FC = () => {
     } catch (error) {
       console.error('Error creating post:', error)
       alert('投稿に失敗しました')
+      throw error // エラーを再スローしてProfilePageでも処理できるようにする
     }
   }
 

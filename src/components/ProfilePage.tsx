@@ -137,18 +137,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
         created_at: new Date().toISOString()
       }
 
-      // 直接データベースに挿入
-      const { data, error } = await supabase
-        .from('diary')
-        .insert([postData])
-        .select()
-        .single()
-
-      if (error) throw error
-
-      // 成功した場合のみコールバックを呼び出し
-      if (onNewPost && data) {
-        onNewPost(postData)
+      // onNewPostコールバックのみを呼び出し（データベース挿入はApp.tsxで実行）
+      if (onNewPost) {
+        await onNewPost(postData)
       }
       
       // フォームをリセット

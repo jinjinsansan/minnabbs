@@ -116,7 +116,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
         setLikeCount(likeCountResult || 0)
 
         // 現在のユーザーがいいねしているかチェック
-        if (user) {
+        if (user && user.id !== 'admin-user') {
           const { data: userLike } = await supabase
             .from('likes')
             .select('*')
@@ -215,6 +215,12 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
   const handleLike = async () => {
     if (!user) {
       alert('いいね！するにはログインが必要です。')
+      return
+    }
+
+    // 管理者モードの場合はいいね機能を無効化
+    if (user.id === 'admin-user') {
+      alert('管理者モードではいいね機能は使用できません。')
       return
     }
     
