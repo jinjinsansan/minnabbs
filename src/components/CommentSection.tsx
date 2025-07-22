@@ -46,13 +46,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
 
   // 管理者状態のデバッグ情報
   const effectiveIsAdmin = isAdmin || isAdminMode || profile?.is_admin || false
-  console.log('CommentSection admin state:', {
-    isAdmin,
-    userProfile: profile,
-    userIsAdmin: profile?.is_admin,
-    effectiveIsAdmin,
-    userId: user?.id
-  })
 
   const fetchComments = useCallback(async () => {
     try {
@@ -213,17 +206,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
     const isDiaryOwner = diaryUserId === user.id
     const hasAdminRights = effectiveIsAdmin
     
-    console.log('Comment delete permission check:', {
-      commentId: comment.id,
-      commentUserId: comment.user_id,
-      currentUserId: user.id,
-      diaryUserId,
-      isAdmin,
-      isCommentOwner,
-      isDiaryOwner,
-      hasAdminRights,
-      canDelete: isCommentOwner || isDiaryOwner || hasAdminRights
-    })
+
     
     return (
       isCommentOwner || // コメント投稿者本人

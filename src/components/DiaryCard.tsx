@@ -68,33 +68,14 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
   const { user, profile, isAdminMode } = useAuth()
   const colors = getEmotionColorClasses(diary.emotion) // 感情に応じた色を取得
 
-  // 管理者状態のデバッグ情報
-  console.log('DiaryCard admin state:', {
-    isAdmin,
-    profileIsAdmin: profile?.is_admin,
-    userId: user?.id,
-    diaryId: diary.id
-  })
+
 
   const isOwner = (currentUserId && diary.user_id && currentUserId === diary.user_id) || 
                   (user?.id && diary.user_id && user.id === diary.user_id)
   const canEdit = isOwner || isAdmin || isAdminMode || profile?.is_admin
   const canDelete = isOwner || isAdmin || isAdminMode || profile?.is_admin
 
-  // 削除権限のデバッグ情報
-  console.log('DiaryCard delete permission check:', {
-    diaryId: diary.id,
-    diaryUserId: diary.user_id,
-    currentUserId,
-    userId: user?.id,
-    isOwner,
-    isAdmin,
-    isAdminMode,
-    profileIsAdmin: profile?.is_admin,
-    canEdit,
-    canDelete,
-    onDelete: !!onDelete
-  })
+
 
   // ユーザープロフィールを取得
   useEffect(() => {
@@ -403,11 +384,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
 
             {canEdit && (
               <div className="relative">
-                {/* デバッグ: メニューボタンが表示される */}
-                {(() => { 
-                  console.log('Menu button should be visible for diary:', diary.id, 'canEdit:', canEdit, 'canDelete:', canDelete); 
-                  return null; 
-                })()}
+
                 <button 
                   onClick={() => setShowMenu(!showMenu)}
                   className="p-2.5 rounded-xl hover:bg-white/70 transition-all duration-200 text-gray-600 hover:text-gray-700 shadow-sm hover:shadow-md transform hover:scale-105"
@@ -432,7 +409,6 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
                     {canDelete && (
                       <button
                         onClick={() => {
-                          console.log('Delete button clicked for diary:', diary.id)
                           handleDelete()
                           setShowMenu(false)
                         }}
