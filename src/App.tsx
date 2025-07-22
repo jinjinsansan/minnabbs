@@ -23,7 +23,7 @@ const DiaryDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [showUserProfilePage, setShowUserProfilePage] = useState(false)
   const [selectedUserId, setSelectedUserId] = useState<string>('')
-  const { user, profile } = useAuth()
+  const { user, profile, originalUserId } = useAuth()
 
   useEffect(() => {
     if (diaryId) {
@@ -52,8 +52,22 @@ const DiaryDetailPage: React.FC = () => {
   }
 
   const handleDeleteDiary = async () => {
-    // 削除後はホームに戻る
-    navigate('/')
+    try {
+      if (!diary) return
+      
+      const { error } = await supabase
+        .from('diary')
+        .delete()
+        .eq('id', diary.id)
+
+      if (error) throw error
+      
+      // 削除成功時のみホームに戻る
+      navigate('/')
+    } catch (error) {
+      console.error('Error deleting diary:', error)
+      alert('削除に失敗しました。もう一度お試しください。')
+    }
   }
 
   const handleUpdateDiary = async (diaryId: string, updates: Partial<DiaryEntry>) => {
@@ -108,7 +122,7 @@ const DiaryDetailPage: React.FC = () => {
         
         <DiaryCard
           diary={diary}
-          currentUserId={user?.id}
+          currentUserId={originalUserId || user?.id}
           isAdmin={profile?.is_admin || false}
           onDelete={handleDeleteDiary}
           onUpdate={handleUpdateDiary}
@@ -147,7 +161,7 @@ const BoardPage: React.FC = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [currentPage, setCurrentPage] = useState(0)
   const ITEMS_PER_PAGE = 30
-  const { user, profile, isAdminMode, loading: authLoading } = useAuth()
+  const { user, profile, isAdminMode, originalUserId, loading: authLoading } = useAuth()
   const { blockedUsers } = useBlock()
 
   useEffect(() => {
@@ -315,16 +329,13 @@ const BoardPage: React.FC = () => {
 
       if (error) throw error
       
-      // 削除後に状態を確実に更新
+      // 削除成功時のみUIを更新
       setDiaries(prev => prev.filter(diary => diary.id !== diaryId))
       setFilteredDiaries(prev => prev.filter(diary => diary.id !== diaryId))
       setDisplayedDiaries(prev => prev.filter(diary => diary.id !== diaryId))
-      
-      // 削除成功のフィードバック
-      console.log('Diary deleted successfully:', diaryId)
     } catch (error) {
       console.error('Error deleting diary:', error)
-      alert('削除に失敗しました')
+      alert('削除に失敗しました。もう一度お試しください。')
     }
   }
 
@@ -358,15 +369,23 @@ const BoardPage: React.FC = () => {
     }
   }
 
-  const handleNewPost = async (postData: DiaryEntry) => {
+  const handleNewPost = async (postData: Omit<DiaryEntry, 'id' | 'created_at'>) => {
     if (!user) {
       alert('日記を投稿するにはログインが必要です')
       return
     }
 
     try {
-      // 既にデータベースに挿入済みのデータを受け取るので、状態更新のみ行う
-      const newDiary = postData
+      const { data, error } = await supabase
+        .from('diary')
+        .insert([postData])
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // 新しい投稿をリストの先頭に追加（一括更新でパフォーマンス向上）
+      const newDiary = data
       setDiaries(prev => [newDiary, ...prev])
       setFilteredDiaries(prev => [newDiary, ...prev])
       
@@ -376,8 +395,8 @@ const BoardPage: React.FC = () => {
         return newDisplayed
       })
     } catch (error) {
-      console.error('Error updating state after post:', error)
-      alert('投稿の状態更新に失敗しました')
+      console.error('Error creating post:', error)
+      alert('投稿に失敗しました')
     }
   }
 
@@ -513,7 +532,7 @@ const BoardPage: React.FC = () => {
                         <DiaryCard
                           key={diary.id}
                           diary={diary}
-                          currentUserId={user?.id}
+                          currentUserId={originalUserId || user?.id}
                           isAdmin={isAdminMode || profile?.is_admin || false}
                           onDelete={handleDeleteDiary}
                           onUpdate={handleUpdateDiary}

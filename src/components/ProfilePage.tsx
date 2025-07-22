@@ -10,7 +10,7 @@ type DiaryEntry = Database['public']['Tables']['diary']['Row']
 
 interface ProfilePageProps {
   onClose: () => void
-  onNewPost?: (post: DiaryEntry) => void
+  onNewPost?: (post: Omit<DiaryEntry, 'id' | 'created_at'>) => void
   user: { id: string; email?: string } | null
   profile: { display_name?: string; avatar_url?: string; email?: string; created_at?: string; is_admin?: boolean; is_blocked?: boolean } | null
 }
@@ -146,9 +146,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
 
       if (error) throw error
 
-      // 成功した場合のみコールバックを呼び出し（データベースから返されたデータを渡す）
+      // 成功した場合のみコールバックを呼び出し
       if (onNewPost && data) {
-        onNewPost(data)
+        onNewPost(postData)
       }
       
       // フォームをリセット

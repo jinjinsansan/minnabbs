@@ -65,17 +65,15 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
   const [likeCount, setLikeCount] = useState(0)
   const [commentCount, setCommentCount] = useState(0)
   const [userProfile, setUserProfile] = useState<{ display_name: string | null } | null>(null)
-  const { user, profile, isAdminMode } = useAuth()
+  const { user, profile, isAdminMode, originalUserId } = useAuth()
   const colors = getEmotionColorClasses(diary.emotion) // 感情に応じた色を取得
 
-
-
-  const isOwner = (currentUserId && diary.user_id && currentUserId === diary.user_id) || 
-                  (user?.id && diary.user_id && user.id === diary.user_id)
+  // 簡素化された権限チェックロジック
+  const isOwner = (originalUserId && diary.user_id && originalUserId === diary.user_id) ||
+                  (user?.id && diary.user_id && user.id === diary.user_id && user.id !== 'admin-user') ||
+                  (currentUserId && diary.user_id && currentUserId === diary.user_id)
   const canEdit = isOwner || isAdmin || isAdminMode || profile?.is_admin
   const canDelete = isOwner || isAdmin || isAdminMode || profile?.is_admin
-
-
 
   // ユーザープロフィールを取得
   useEffect(() => {
@@ -195,16 +193,15 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
     return '匿名'
   }
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
+    // 削除権限の再確認
+    if (!canDelete) {
+      alert('削除権限がありません')
+      return
+    }
+    
     if (onDelete && window.confirm('この投稿を削除しますか？')) {
-      try {
-        await onDelete(diary.id)
-        // 削除成功のフィードバック
-        console.log('Delete request sent for diary:', diary.id)
-      } catch (error) {
-        console.error('Error in handleDelete:', error)
-        alert('削除処理中にエラーが発生しました')
-      }
+      onDelete(diary.id)
     }
   }
 

@@ -19,6 +19,7 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true)
   const [isAdminMode, setIsAdminMode] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
+  const [originalUserId, setOriginalUserId] = useState<string | null>(null) // 元のユーザーIDを保持
 
   // 管理者ログイン状態をチェックする関数
   const checkAdminStatus = useCallback(() => {
@@ -30,7 +31,6 @@ export const useAuth = () => {
   // プロフィール取得関数
   const fetchProfile = useCallback(async (userId: string) => {
     try {
-
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -43,10 +43,8 @@ export const useAuth = () => {
       }
 
       if (data) {
-
         return data
       } else {
-
         return await createProfile(userId)
       }
     } catch (error) {
@@ -58,12 +56,10 @@ export const useAuth = () => {
   // プロフィール作成関数
   const createProfile = useCallback(async (userId: string) => {
     try {
-
       const { data: userData } = await supabase.auth.getUser()
       const user = userData.user
       
       if (!user) {
-
         return null
       }
 
@@ -75,8 +71,6 @@ export const useAuth = () => {
         is_admin: user.email === 'jin@namisapo.com',
         is_blocked: false,
       }
-
-
 
       const { data, error } = await supabase
         .from('profiles')
@@ -98,7 +92,6 @@ export const useAuth = () => {
         }
       }
 
-
       return data
     } catch (error) {
       console.error('Error in createProfile:', error)
@@ -110,8 +103,6 @@ export const useAuth = () => {
   useEffect(() => {
     if (isInitialized) return
 
-
-    
     const initializeAuth = async () => {
       try {
         // 管理者ログイン状態をチェック
@@ -119,19 +110,19 @@ export const useAuth = () => {
         setIsAdminMode(isAdmin)
         
         // 現在のセッションを取得
-
         const { data: { session } } = await supabase.auth.getSession()
-
         
         setSession(session)
         setUser(session?.user ?? null)
         
         if (session?.user) {
-
+          // 元のユーザーIDを保存
+          setOriginalUserId(session.user.id)
+          
           if (isAdmin) {
             // 管理者モードの場合
             const adminProfile = {
-              id: session.user.id,
+              id: session.user.id, // 元のユーザーIDを保持
               email: 'jin@namisapo.com',
               display_name: '管理者',
               avatar_url: null,
@@ -179,18 +170,14 @@ export const useAuth = () => {
   useEffect(() => {
     if (!isInitialized) return
 
-
-    
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-
-        
         if (event === 'SIGNED_OUT') {
-
           setSession(null)
           setUser(null)
           setProfile(null)
           setIsAdminMode(false)
+          setOriginalUserId(null)
           localStorage.removeItem('adminLoggedIn')
           localStorage.removeItem('adminEmail')
           setLoading(false)
@@ -201,13 +188,15 @@ export const useAuth = () => {
         setUser(session?.user ?? null)
         
         if (session?.user) {
-
+          // 元のユーザーIDを保存
+          setOriginalUserId(session.user.id)
+          
           const isAdmin = checkAdminStatus()
           
           if (isAdmin) {
             // 管理者モードの場合
             const adminProfile = {
-              id: session.user.id,
+              id: session.user.id, // 元のユーザーIDを保持
               email: 'jin@namisapo.com',
               display_name: '管理者',
               avatar_url: null,
@@ -224,7 +213,6 @@ export const useAuth = () => {
             }
           }
         } else {
-
           const isAdmin = checkAdminStatus()
           if (isAdmin) {
             const adminProfile = {
@@ -242,7 +230,6 @@ export const useAuth = () => {
         }
         
         setLoading(false)
-
       }
     )
 
@@ -262,9 +249,14 @@ export const useAuth = () => {
     localStorage.setItem('adminLoggedIn', 'true')
     localStorage.setItem('adminEmail', 'jin@namisapo.com')
     
+    // 元のユーザーIDを保持
     const currentUserId = user?.id || 'admin-user'
+    if (user?.id && user.id !== 'admin-user') {
+      setOriginalUserId(user.id)
+    }
+    
     const adminProfile = {
-      id: currentUserId,
+      id: currentUserId, // 元のユーザーIDを保持
       email: 'jin@namisapo.com',
       display_name: '管理者',
       avatar_url: null,
@@ -276,6 +268,7 @@ export const useAuth = () => {
     console.log('Setting admin profile:', adminProfile)
     setProfile(adminProfile)
     
+    // ユーザーオブジェクトは元のIDを保持
     if (user) {
       setUser({ ...user, email: 'jin@namisapo.com' })
     } else {
@@ -316,17 +309,14 @@ export const useAuth = () => {
 
   const signOut = async () => {
     try {
-  
-      
       setIsAdminMode(false)
       localStorage.removeItem('adminLoggedIn')
       localStorage.removeItem('adminEmail')
       setProfile(null)
       setUser(null)
       setSession(null)
+      setOriginalUserId(null)
       setLoading(false)
-      
-
       
       const { error } = await supabase.auth.signOut()
       if (error) {
@@ -334,7 +324,6 @@ export const useAuth = () => {
         throw error
       }
       
-
     } catch (error) {
       console.error('Sign out error:', error)
       throw error
@@ -347,6 +336,7 @@ export const useAuth = () => {
     session,
     loading,
     isAdminMode,
+    originalUserId, // 元のユーザーIDを公開
     updateProfile,
     loginAsAdmin,
     logout,
