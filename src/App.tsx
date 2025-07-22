@@ -315,9 +315,13 @@ const BoardPage: React.FC = () => {
 
       if (error) throw error
       
+      // 削除後に状態を確実に更新
       setDiaries(prev => prev.filter(diary => diary.id !== diaryId))
       setFilteredDiaries(prev => prev.filter(diary => diary.id !== diaryId))
       setDisplayedDiaries(prev => prev.filter(diary => diary.id !== diaryId))
+      
+      // 削除成功のフィードバック
+      console.log('Diary deleted successfully:', diaryId)
     } catch (error) {
       console.error('Error deleting diary:', error)
       alert('削除に失敗しました')
@@ -354,23 +358,15 @@ const BoardPage: React.FC = () => {
     }
   }
 
-  const handleNewPost = async (postData: Omit<DiaryEntry, 'id' | 'created_at'>) => {
+  const handleNewPost = async (postData: DiaryEntry) => {
     if (!user) {
       alert('日記を投稿するにはログインが必要です')
       return
     }
 
     try {
-      const { data, error } = await supabase
-        .from('diary')
-        .insert([postData])
-        .select()
-        .single()
-
-      if (error) throw error
-
-      // 新しい投稿をリストの先頭に追加（一括更新でパフォーマンス向上）
-      const newDiary = data
+      // 既にデータベースに挿入済みのデータを受け取るので、状態更新のみ行う
+      const newDiary = postData
       setDiaries(prev => [newDiary, ...prev])
       setFilteredDiaries(prev => [newDiary, ...prev])
       
@@ -380,8 +376,8 @@ const BoardPage: React.FC = () => {
         return newDisplayed
       })
     } catch (error) {
-      console.error('Error creating post:', error)
-      alert('投稿に失敗しました')
+      console.error('Error updating state after post:', error)
+      alert('投稿の状態更新に失敗しました')
     }
   }
 

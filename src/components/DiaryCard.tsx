@@ -195,9 +195,16 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
     return '匿名'
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (onDelete && window.confirm('この投稿を削除しますか？')) {
-      onDelete(diary.id)
+      try {
+        await onDelete(diary.id)
+        // 削除成功のフィードバック
+        console.log('Delete request sent for diary:', diary.id)
+      } catch (error) {
+        console.error('Error in handleDelete:', error)
+        alert('削除処理中にエラーが発生しました')
+      }
     }
   }
 
@@ -302,8 +309,8 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
                 }
                 
                 return formatDistanceToNow(createdAt, { 
-                  addSuffix: true, 
-                  locale: ja 
+                addSuffix: true, 
+                locale: ja 
                 })
               })()}
             </span>

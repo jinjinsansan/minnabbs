@@ -259,8 +259,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
                       }
                       
                       return formatDistanceToNow(createdAt, { 
-                        addSuffix: true, 
-                        locale: ja 
+                      addSuffix: true, 
+                      locale: ja 
                       })
                     })()}
                   </span>

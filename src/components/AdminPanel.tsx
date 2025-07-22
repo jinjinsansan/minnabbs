@@ -543,8 +543,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
                                 }
                                 
                                 return formatDistanceToNow(createdAt, { 
-                                  addSuffix: true, 
-                                  locale: ja 
+                          addSuffix: true, 
+                          locale: ja 
                                 })
                               })()}</span>
                             </div>
@@ -654,8 +654,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
                               }
                               
                               return formatDistanceToNow(createdAt, { 
-                                addSuffix: true, 
-                                locale: ja 
+                              addSuffix: true, 
+                              locale: ja 
                               })
                             })()}
                           </span>
