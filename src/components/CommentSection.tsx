@@ -133,6 +133,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
     e.preventDefault()
     if (!newComment.trim() || !user || isSubmitting) return
 
+    // 管理者モードの場合はコメント投稿を無効化
+    if (user.id === 'admin-user') {
+      alert('管理者モードではコメント投稿は使用できません。')
+      return
+    }
+
     // システム設定をチェック
     if (!settings.allow_anonymous_posts && isAnonymous) {
       alert('現在、匿名投稿は許可されていません')
@@ -202,11 +208,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
   const canDeleteComment = (comment: Comment) => {
     if (!user) return false
     
+    // 管理者モードの場合は削除権限を付与
+    if (user.id === 'admin-user' && effectiveIsAdmin) {
+      return true
+    }
+    
     const isCommentOwner = comment.user_id === user.id
     const isDiaryOwner = diaryUserId === user.id
     const hasAdminRights = effectiveIsAdmin
-    
-
     
     return (
       isCommentOwner || // コメント投稿者本人

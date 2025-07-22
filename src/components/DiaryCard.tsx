@@ -115,7 +115,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
 
         setLikeCount(likeCountResult || 0)
 
-        // 現在のユーザーがいいねしているかチェック
+        // 管理者モードの場合はいいね状態をチェックしない
         if (user && user.id !== 'admin-user') {
           const { data: userLike } = await supabase
             .from('likes')
@@ -125,9 +125,14 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
             .single()
 
           setLiked(!!userLike)
+        } else {
+          // 管理者モードの場合はいいね状態をfalseに設定
+          setLiked(false)
         }
       } catch (error) {
         console.error('Error fetching like status:', error)
+        // エラー時はいいね状態をfalseに設定
+        setLiked(false)
       }
     }
 
