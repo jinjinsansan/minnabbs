@@ -408,7 +408,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
                 </button>
                 
                 {showMenu && (
-                  <div className="absolute right-0 mt-2 w-44 bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl border-2 border-gray-200/50 py-3 z-10 backdrop-blur-md">
+                  <div className="absolute right-0 mt-2 w-44 bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl border-2 border-gray-200/50 py-3 z-50 backdrop-blur-md">
                     {canEdit && (
                       <button
                         onClick={() => {
