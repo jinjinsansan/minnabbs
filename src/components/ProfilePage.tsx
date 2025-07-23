@@ -260,9 +260,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
 
   return (
     <div className="modal-overlay">
-      <div className="bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 rounded-2xl max-w-2xl w-full max-h-[90vh] sm:max-h-[90vh] overflow-hidden shadow-2xl border border-purple-200">
+      <div className="bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 rounded-2xl max-w-2xl w-full max-h-[95vh] sm:max-h-[95vh] flex flex-col shadow-2xl border border-purple-200">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-purple-200 bg-gradient-to-r from-purple-100 to-pink-100">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-purple-200 bg-gradient-to-r from-purple-100 to-pink-100 flex-shrink-0">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
@@ -278,7 +278,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
         </div>
 
         {/* Tabs - モバイルでスクロール可能 */}
-        <div className="flex overflow-x-auto border-b border-purple-200 bg-white/70 backdrop-blur-sm scrollbar-hide">
+        <div className="flex overflow-x-auto border-b border-purple-200 bg-white/70 backdrop-blur-sm scrollbar-hide flex-shrink-0">
           <div className="flex min-w-full sm:min-w-0">
             <button
               onClick={() => setActiveTab('diary')}
@@ -328,7 +328,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
         </div>
 
         {/* Content */}
-        <div className="p-4 sm:p-6 overflow-y-auto max-h-[calc(90vh-200px)] bg-white/30 backdrop-blur-sm pb-24 sm:pb-6">
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1 bg-white/30 backdrop-blur-sm">
           {/* Diary Tab */}
           {activeTab === 'diary' && (
             <div className="space-y-4 sm:space-y-6">
@@ -869,7 +869,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
         </div>
 
         {/* Footer */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-6 border-t border-purple-200 bg-gradient-to-r from-purple-100 to-pink-100 space-y-3 sm:space-y-0 fixed bottom-0 left-0 right-0 z-50 sm:relative">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-6 border-t border-purple-200 bg-gradient-to-r from-purple-100 to-pink-100 space-y-3 sm:space-y-0 flex-shrink-0">
           <button
             onClick={onClose}
             className="bg-white/70 text-purple-700 px-6 py-3 rounded-xl font-semibold hover:bg-white transition-all duration-200 border border-purple-200 shadow-md hover:shadow-lg min-h-[48px] w-full sm:w-auto"
