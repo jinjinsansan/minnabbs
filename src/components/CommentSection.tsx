@@ -115,22 +115,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
 
   // コメントの表示名を決定する関数（匿名コメントの場合はプロフィール情報を無視）
   const getCommentDisplayName = (comment: Comment) => {
-    // デバッグログを追加
-    console.log('CommentSection getCommentDisplayName:', {
-      commentId: comment.id,
-      commentNickname: comment.nickname,
-      commentUserId: comment.user_id,
-      userProfileDisplayName: comment.user_id ? userProfiles[comment.user_id]?.display_name : null
-    })
-
     // 匿名コメントの場合（nicknameがnullまたは空文字）
     if (!comment.nickname) {
-      console.log('匿名コメントとして表示')
       return '匿名'
     }
     
     // 実名コメントの場合
-    console.log('実名コメントとして表示:', comment.nickname)
     return comment.nickname
   }
 
@@ -158,25 +148,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
 
     setIsSubmitting(true)
     try {
-      // デバッグログを追加
-      console.log('コメント匿名投稿チェック:', {
-        isAnonymous,
-        profileDisplayName: profile?.display_name,
-        finalNickname: isAnonymous ? null : (profile?.display_name || '匿名')
-      })
-
-      const commentData = {
-        diary_id: diaryId,
-        user_id: user.id,
-        nickname: isAnonymous ? null : (profile?.display_name || '匿名'),
-        content: newComment.trim()
-      }
-
-      console.log('コメント投稿データ:', commentData)
-
       const { error } = await supabase
         .from('comments')
-        .insert([commentData])
+        .insert([{
+          diary_id: diaryId,
+          user_id: user.id,
+          nickname: isAnonymous ? null : (profile?.display_name || '匿名'),
+          content: newComment.trim()
+        }])
 
       if (error) throw error
       await fetchComments()
