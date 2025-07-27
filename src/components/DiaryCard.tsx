@@ -182,20 +182,25 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
     return emotions[emotion || ''] || null
   }
 
-  // 表示名を決定する関数（プロフィールページの最新情報を優先）
+  // 表示名を決定する関数（匿名投稿の場合はプロフィール情報を無視）
   const getDisplayName = () => {
-    // 1. プロフィールページで設定された最新の表示名を優先
-    if (userProfile?.display_name) {
-      return userProfile.display_name
+    // デバッグログを追加
+    console.log('DiaryCard getDisplayName:', {
+      diaryId: diary.id,
+      diaryNickname: diary.nickname,
+      userProfileDisplayName: userProfile?.display_name,
+      userProfile: userProfile
+    })
+
+    // 匿名投稿の場合（nicknameがnullまたは空文字）
+    if (!diary.nickname) {
+      console.log('匿名投稿として表示')
+      return '匿名'
     }
     
-    // 2. 投稿時に設定された表示名
-    if (diary.nickname) {
-      return diary.nickname
-    }
-    
-    // 3. デフォルト
-    return '匿名'
+    // 実名投稿の場合
+    console.log('実名投稿として表示:', diary.nickname)
+    return diary.nickname
   }
 
   const handleDelete = () => {

@@ -128,6 +128,14 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
 
     setIsSubmitting(true)
     try {
+      // デバッグログを追加
+      console.log('匿名投稿チェック:', {
+        isAnonymous,
+        diaryNickname: diaryNickname.trim(),
+        profileDisplayName: profile?.display_name,
+        finalNickname: isAnonymous ? null : (diaryNickname.trim() || profile?.display_name || null)
+      })
+
       const postData = {
         user_id: user?.id || 'anonymous-user',
         nickname: isAnonymous ? null : (diaryNickname.trim() || profile?.display_name || null),
@@ -136,6 +144,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
         is_public: true,
         created_at: new Date().toISOString()
       }
+
+      console.log('投稿データ:', postData)
 
       // onNewPostコールバックのみを呼び出し（データベース挿入はApp.tsxで実行）
       if (onNewPost) {
