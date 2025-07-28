@@ -47,8 +47,29 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
   // 管理者状態のデバッグ情報
   const effectiveIsAdmin = isAdmin || isAdminMode || profile?.is_admin || false
 
+  const fetchComments = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('comments')
+        .select('*')
+        .eq('diary_id', diaryId)
+        .order('created_at', { ascending: true })
+
+      if (error) throw error
+      setComments(data || [])
+      
+      // コメント投稿者のプロフィール情報を取得
+      if (data && data.length > 0) {
+        const userIds = [...new Set(data.map(comment => comment.user_id).filter(Boolean))]
+        await fetchUserProfiles(userIds)
+      }
+    } catch (error) {
+      console.error('Error fetching comments:', error)
+    }
+  }, [diaryId])
+
   // ユーザープロフィールを取得する関数
-  const fetchUserProfiles = useCallback(async (userIds: string[]) => {
+  const fetchUserProfiles = async (userIds: string[]) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -70,28 +91,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
     } catch (error) {
       console.error('Error in fetchUserProfiles:', error)
     }
-  }, [])
-
-  const fetchComments = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('comments')
-        .select('*')
-        .eq('diary_id', diaryId)
-        .order('created_at', { ascending: true })
-
-      if (error) throw error
-      setComments(data || [])
-      
-      // コメント投稿者のプロフィール情報を取得
-      if (data && data.length > 0) {
-        const userIds = [...new Set(data.map(comment => comment.user_id).filter(Boolean))]
-        await fetchUserProfiles(userIds)
-      }
-    } catch (error) {
-      console.error('Error fetching comments:', error)
-    }
-  }, [diaryId, fetchUserProfiles])
+  }
 
   // コメント数を取得する関数
   const getCommentCount = useCallback(async () => {
@@ -111,10 +111,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
 
   useEffect(() => {
     fetchComments()
-  }, [fetchComments])
+  }, [diaryId])
 
   // コメントの表示名を決定する関数（匿名コメントの場合はプロフィール情報を無視）
-  const getCommentDisplayName = useCallback((comment: Comment) => {
+  const getCommentDisplayName = (comment: Comment) => {
     // 匿名コメントの場合（nicknameがnullまたは空文字）
     if (!comment.nickname) {
       return '匿名'
@@ -122,7 +122,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
     
     // 実名コメントの場合
     return comment.nickname
-  }, [])
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

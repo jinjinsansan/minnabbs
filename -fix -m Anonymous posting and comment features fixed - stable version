@@ -1,0 +1,5 @@
+[33m71426bc[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m Remove debug logs from anonymous posting and comment features
+[33m9063b27[m Fix anonymous comment display issue - show '匿名' when comment nickname is null
+[33m771c635[m Fix anonymous posting display issue - show '匿名' when nickname is null
+[33m27dda79[m Fix profile page layout - resolve save button cutoff issue in desktop view
+[33m70f8081[m[33m ([m[1;33mtag: [m[1;33mbackup-20240722[m[33m)[m  ミートボールメニューのz-indexをz-50に修正（編集削除が隠れないように）
