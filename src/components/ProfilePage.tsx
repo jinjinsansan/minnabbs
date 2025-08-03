@@ -67,7 +67,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
         if (error) throw error
         setBlockedUserProfiles(data || [])
       } catch (error) {
-        console.error('Error fetching blocked user profiles:', error)
+        // ブロックユーザープロフィール取得エラーを静かに処理
       }
     }
 
@@ -151,7 +151,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
       
       alert('日記を投稿しました！')
     } catch (error) {
-      console.error('Error posting diary:', error)
+      // 日記投稿エラー時はアラート表示
       alert('投稿に失敗しました')
     } finally {
       setIsSubmitting(false)
@@ -184,7 +184,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
       alert('プロフィールを更新しました！')
       onClose() // モーダルを閉じる
     } catch (error) {
-      console.error('Error updating profile:', error)
+      // プロフィール更新エラー時はアラート表示
       alert('プロフィールの更新に失敗しました')
     } finally {
       setIsSaving(false)
@@ -230,7 +230,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
       setAvatarUrl(publicUrl)
       
     } catch (error) {
-      console.error('Error uploading avatar:', error)
+      // アバターアップロードエラー時はアラート表示
       alert('画像のアップロードに失敗しました')
     }
   }
@@ -253,7 +253,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onClose, onNewPost, user, pro
       setAvatarUrl('')
       
     } catch (error) {
-      console.error('Error deleting avatar:', error)
+      // アバター削除エラー時はアラート表示
       alert('画像の削除に失敗しました')
     }
   }

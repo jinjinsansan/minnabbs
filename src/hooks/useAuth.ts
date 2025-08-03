@@ -38,7 +38,7 @@ export const useAuth = () => {
         .single()
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching profile:', error)
+        // プロフィール取得エラーを静かに処理
         return null
       }
 
@@ -48,7 +48,7 @@ export const useAuth = () => {
         return await createProfile(userId)
       }
     } catch (error) {
-      console.error('Error in fetchProfile:', error)
+      // fetchProfile エラーを静かに処理
       return null
     }
   }, [])
@@ -79,8 +79,7 @@ export const useAuth = () => {
         .single()
 
       if (error) {
-        console.error('Error creating profile:', error)
-        // フォールバックプロフィールを返す
+        // プロフィール作成エラー時はフォールバックプロフィールを返す
         return {
           id: userId,
           email: user.email || null,
@@ -94,7 +93,7 @@ export const useAuth = () => {
 
       return data
     } catch (error) {
-      console.error('Error in createProfile:', error)
+      // createProfile エラーを静かに処理
       return null
     }
   }, [])
@@ -157,7 +156,7 @@ export const useAuth = () => {
         setIsInitialized(true)
 
       } catch (error) {
-        console.error('Error in initializeAuth:', error)
+        // 初期化エラーを静かに処理
         setLoading(false)
         setIsInitialized(true)
       }
@@ -243,8 +242,6 @@ export const useAuth = () => {
   }
 
   const loginAsAdmin = () => {
-    console.log('loginAsAdmin called')
-    
     setIsAdminMode(true)
     localStorage.setItem('adminLoggedIn', 'true')
     localStorage.setItem('adminEmail', 'jin@namisapo.com')
@@ -265,7 +262,6 @@ export const useAuth = () => {
       created_at: new Date().toISOString()
     }
     
-    console.log('Setting admin profile:', adminProfile)
     setProfile(adminProfile)
     
     // ユーザーオブジェクトは元のIDを保持
@@ -274,8 +270,6 @@ export const useAuth = () => {
     } else {
       setUser({ id: currentUserId, email: 'jin@namisapo.com' } as User)
     }
-    
-    console.log('Admin login completed')
   }
 
   const logout = () => {
@@ -298,11 +292,9 @@ export const useAuth = () => {
       })
       
       if (error) {
-        console.error('Error signing in with Google:', error)
         throw error
       }
     } catch (error) {
-      console.error('Google sign in error:', error)
       throw error
     }
   }
@@ -320,12 +312,10 @@ export const useAuth = () => {
       
       const { error } = await supabase.auth.signOut()
       if (error) {
-        console.error('Error signing out:', error)
         throw error
       }
       
     } catch (error) {
-      console.error('Sign out error:', error)
       throw error
     }
   }

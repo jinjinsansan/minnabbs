@@ -88,7 +88,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
           .single()
 
         if (error && error.code !== 'PGRST116') {
-          console.error('Error fetching user profile:', error)
+          // ユーザープロフィール取得エラーを静かに処理
           return
         }
 
@@ -96,7 +96,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
           setUserProfile(data)
         }
       } catch (error) {
-        console.error('Error in fetchUserProfile:', error)
+        // fetchUserProfile エラーを静かに処理
       }
     }
 
@@ -130,8 +130,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
           setLiked(false)
         }
       } catch (error) {
-        console.error('Error fetching like status:', error)
-        // エラー時はいいね状態をfalseに設定
+        // いいね状態取得エラー時はfalseに設定
         setLiked(false)
       }
     }
@@ -155,7 +154,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
           setShowComments(true)
         }
       } catch (error) {
-        console.error('Error fetching comment count:', error)
+        // コメント数取得エラーを静かに処理
       }
     }
 
@@ -252,7 +251,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({
         setLikeCount(prev => prev + 1)
       }
     } catch (error) {
-      console.error('Error handling like:', error)
+      // いいね処理エラー時はアラート表示
       alert('いいねの処理に失敗しました')
     }
   }

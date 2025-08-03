@@ -44,7 +44,7 @@ const DiaryDetailPage: React.FC = () => {
       if (error) throw error
       setDiary(data)
     } catch (error) {
-      console.error('Error fetching diary:', error)
+      // 日記取得エラー時はホームに戻る
       navigate('/')
     } finally {
       setLoading(false)
@@ -65,7 +65,7 @@ const DiaryDetailPage: React.FC = () => {
       // 削除成功時のみホームに戻る
       navigate('/')
     } catch (error) {
-      console.error('Error deleting diary:', error)
+      // 削除エラー時はアラート表示
       alert('削除に失敗しました。もう一度お試しください。')
     }
   }
@@ -203,7 +203,7 @@ const BoardPage: React.FC = () => {
       
       
     } catch (error) {
-      console.error('Error fetching diaries:', error)
+      // 日記一覧取得エラーを静かに処理
     } finally {
       setLoading(false)
       setRefreshing(false)
@@ -334,7 +334,7 @@ const BoardPage: React.FC = () => {
       setFilteredDiaries(prev => prev.filter(diary => diary.id !== diaryId))
       setDisplayedDiaries(prev => prev.filter(diary => diary.id !== diaryId))
     } catch (error) {
-      console.error('Error deleting diary:', error)
+      // 削除エラー時はアラート表示
       alert('削除に失敗しました。もう一度お試しください。')
     }
   }
@@ -364,7 +364,7 @@ const BoardPage: React.FC = () => {
         )
       )
     } catch (error) {
-      console.error('Error updating diary:', error)
+      // 更新エラー時はアラート表示
       alert('更新に失敗しました')
     }
   }
@@ -395,7 +395,7 @@ const BoardPage: React.FC = () => {
         return newDisplayed
       })
     } catch (error) {
-      console.error('Error creating post:', error)
+      // 投稿エラー時はアラート表示
       alert('投稿に失敗しました')
       throw error // エラーを再スローしてProfilePageでも処理できるようにする
     }
@@ -614,9 +614,7 @@ const BoardPage: React.FC = () => {
       {showAdminLogin && (
         <AdminLogin 
           onLogin={(isAdmin) => {
-            console.log('Admin login callback received:', isAdmin)
             if (isAdmin) {
-              console.log('Setting showAdminLogin to false and showAdminPanel to true')
               setShowAdminLogin(false)
               // 少し遅延を入れて状態更新を確実にする
               setTimeout(() => {

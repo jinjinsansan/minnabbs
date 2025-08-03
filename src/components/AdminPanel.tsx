@@ -145,7 +145,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
         updateStats(data, posts)
       }
     } catch (error) {
-      console.error('Error fetching users:', error)
+      // ユーザー取得エラーを静かに処理
     }
   }
 
@@ -164,7 +164,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
         updateStats(users, data)
       }
     } catch (error) {
-      console.error('Error fetching posts:', error)
+      // 投稿取得エラーを静かに処理
     } finally {
       setLoading(false)
     }
@@ -180,7 +180,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
       if (error) throw error
       await fetchUsers()
     } catch (error) {
-      console.error('Error updating user:', error)
+      // ユーザー更新エラーを静かに処理
     }
   }
 
@@ -196,7 +196,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
       if (error) throw error
       await fetchPosts()
     } catch (error) {
-      console.error('Error deleting post:', error)
+      // 投稿削除エラーを静かに処理
     }
   }
 
@@ -222,19 +222,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
       await fetchPosts()
       setActiveTab('posts')
     } catch (error) {
-      console.error('Error creating thread:', error)
+      // スレッド作成エラーを静かに処理
     }
   }
 
   // システム設定のトグル処理
   const handleToggleSetting = async (key: 'allow_new_registration' | 'allow_anonymous_posts') => {
     const newValue = !settings[key]
-    const success = await updateSetting(key, newValue)
-    
-    if (success) {
-      // 成功時のフィードバック（オプション）
-      console.log(`${key} を ${newValue ? 'ON' : 'OFF'} に設定しました`)
-    }
+    await updateSetting(key, newValue)
   }
 
   const filteredUsers = users.filter(user =>

@@ -20,7 +20,7 @@ export const useBlock = () => {
       if (error) throw error
       setBlockedUsers(data?.map(block => block.blocked_id) || [])
     } catch (error) {
-      console.error('Error fetching blocked users:', error)
+      // エラーは静かに処理（UI影響なし）
     }
   }, [user?.id])
 
@@ -47,7 +47,7 @@ export const useBlock = () => {
       setBlockedUsers(prev => [...prev, userId])
       return true
     } catch (error) {
-      console.error('Error blocking user:', error)
+      // エラーは静かに処理（UI影響なし）
       return false
     } finally {
       setLoading(false)
@@ -71,7 +71,7 @@ export const useBlock = () => {
       setBlockedUsers(prev => prev.filter(id => id !== userId))
       return true
     } catch (error) {
-      console.error('Error unblocking user:', error)
+      // エラーは静かに処理（UI影響なし）
       return false
     } finally {
       setLoading(false)

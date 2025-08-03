@@ -56,7 +56,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
         .in('id', userIds)
 
       if (error) {
-        console.error('Error fetching user profiles:', error)
+        // ユーザープロフィール取得エラーを静かに処理
         return
       }
 
@@ -68,7 +68,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
         setUserProfiles(profilesMap)
       }
     } catch (error) {
-      console.error('Error in fetchUserProfiles:', error)
+      // fetchUserProfiles エラーを静かに処理
     }
   }, [])
 
@@ -89,7 +89,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
         await fetchUserProfiles(userIds)
       }
     } catch (error) {
-      console.error('Error fetching comments:', error)
+      // コメント取得エラーを静かに処理
     }
   }, [diaryId, fetchUserProfiles])
 
@@ -104,7 +104,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
       if (error) throw error
       return count || 0
     } catch (error) {
-      console.error('Error fetching comment count:', error)
+      // コメント数取得エラー時は0を返す
       return 0
     }
   }, [diaryId])
@@ -163,7 +163,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
       setNewComment('')
       setIsAnonymous(false)
     } catch (error) {
-      console.error('Error adding comment:', error)
+      // コメント投稿エラー時はアラート表示
       alert('コメントの投稿に失敗しました')
     } finally {
       setIsSubmitting(false)
@@ -187,14 +187,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({ diaryId, diaryUserId, i
 
       if (error) throw error
       
-      console.log('Comment deleted successfully:', commentId)
       await fetchComments()
-      
-      if (effectiveIsAdmin) {
-        console.log('Admin deleted comment:', commentId)
-      }
     } catch (error) {
-      console.error('Error deleting comment:', error)
+      // コメント削除エラー時はアラート表示
       alert('コメントの削除に失敗しました')
     }
   }

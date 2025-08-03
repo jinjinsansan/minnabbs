@@ -77,7 +77,7 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ userId, onClose }) =>
       if (error) throw error
       setProfile(data)
     } catch (error) {
-      console.error('Error fetching user profile:', error)
+      // ユーザープロフィール取得エラーを静かに処理
     }
   }
 
@@ -93,7 +93,7 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ userId, onClose }) =>
       if (error) throw error
       setDiaries(data || [])
     } catch (error) {
-      console.error('Error fetching user diaries:', error)
+      // ユーザー日記取得エラーを静かに処理
     } finally {
       setLoading(false)
     }

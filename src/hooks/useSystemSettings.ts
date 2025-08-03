@@ -39,7 +39,7 @@ export const useSystemSettings = () => {
 
       setSettings(newSettings)
     } catch (error) {
-      console.error('Error fetching system settings:', error)
+      // システム設定取得エラーを静かに処理
     } finally {
       setLoading(false)
     }
@@ -64,7 +64,7 @@ export const useSystemSettings = () => {
 
       return true
     } catch (error) {
-      console.error('Error updating system setting:', error)
+      // システム設定更新エラーを静かに処理
       return false
     }
   }

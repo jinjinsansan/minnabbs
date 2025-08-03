@@ -47,7 +47,7 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
       setShowLogoutConfirm(false)
 
     } catch (error) {
-      console.error('Logout failed:', error)
+      // ログアウトエラー時はアラート表示
       alert('ログアウトに失敗しました')
     }
   }
@@ -61,7 +61,7 @@ const Header: React.FC<HeaderProps> = ({ onAdminClick, onProfileClick }) => {
       setIsSigningIn(true)
       await signInWithGoogle()
     } catch (error) {
-      console.error('Google sign in failed:', error)
+      // Googleログインエラー時はアラート表示
       alert('Googleログインに失敗しました')
     } finally {
       setIsSigningIn(false)
